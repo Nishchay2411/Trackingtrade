@@ -2,8 +2,8 @@ const rateLimit = require('express-rate-limit');
 
 // Login limiter
 const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts per IP
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   standardHeaders: true,
   legacyHeaders: false,
 
@@ -16,7 +16,7 @@ const loginLimiter = rateLimit({
 
 // Register limiter
 const registerLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
+  windowMs: 60 * 60 * 1000,
   max: 10,
 
   message: {
@@ -26,7 +26,20 @@ const registerLimiter = rateLimit({
   }
 });
 
+// Forgot Password limiter
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 3,
+
+  message: {
+    success: false,
+    message:
+      'Too many password reset requests. Please try again later.'
+  }
+});
+
 module.exports = {
   loginLimiter,
-  registerLimiter
+  registerLimiter,
+  forgotPasswordLimiter
 };
