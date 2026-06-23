@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TrackingTrade — AI Trading Journal</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════════════ -->
+<div id="landing-page" class="landing-wrap">
+  <!-- NAV -->
+  <nav class="landing-nav">
+    <div class="landing-nav-inner">
+      <div style="display:flex;align-items:center;gap:10px;flex:1">
+        <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 12px rgba(37,99,235,.4)">📈</div>
+        <span style="font-size:16px;font-weight:800;letter-spacing:-.5px">Tracking<span style="color:var(--blue2)">Trade</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px">
+        <a href="#features" style="font-size:13px;color:var(--text2)">Features</a>
+        <a href="#pricing"  style="font-size:13px;color:var(--text2)">Pricing</a>
+        <a href="#faq"      style="font-size:13px;color:var(--text2)">FAQ</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-left:20px">
+        <button onclick="toggleTheme()" style="background:none;border:none;font-size:18px;cursor:pointer" id="land-theme-btn">☀️</button>
+        <button onclick="showPage('login')" class="btn btn-outline btn-sm">Sign In</button>
+        <button onclick="showPage('register')" class="btn btn-primary btn-sm">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="landing-hero">
+    <div class="hero-badge">✨ AI Trading Coach · 12,000+ traders worldwide</div>
+    <h1>Trade Smarter.<br><span class="grad-text">Grow Faster.</span></h1>
+    <p>The most powerful trading journal for serious traders. Track every trade, analyze performance, and unlock AI-powered insights.</p>
+    <div class="hero-btns">
+      <button onclick="showPage('register')" class="btn btn-primary" style="font-size:15px;padding:13px 30px">Start Free Trial →</button>
+      <button onclick="showToast('▶ Demo video coming soon!','info')" class="btn btn-outline" style="font-size:15px;padding:13px 24px">▶ Watch Demo</button>
+    </div>
+    <div class="hero-stats">
+      <div style="text-align:center"><div class="hero-stat-num">$2.4B+</div><div class="hero-stat-lbl">Trades Tracked</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div class="hero-stat-num">12K+</div><div class="hero-stat-lbl">Active Traders</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div class="hero-stat-num">4.9★</div><div class="hero-stat-lbl">App Rating</div></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><div class="hero-stat-num">68%</div><div class="hero-stat-lbl">Avg Win Rate</div></div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div id="features" class="landing-section" style="background:var(--bg2);margin:0;max-width:100%;padding:60px 0">
+    <div style="max-width:1100px;margin:0 auto;padding:0 24px">
+      <h2>Everything a serious trader needs</h2>
+      <p class="sub">Built for forex, crypto, stocks and prop firm traders</p>
+      <div class="g3">
+        <div class="feature-card"><div class="feature-icon">📊</div><h3 style="font-size:14px;font-weight:700;margin-bottom:6px">Advanced Analytics</h3><p style="font-size:12px;color:var(--text3);line-height:1.7">Equity curves, drawdown analysis, session heatmaps and 20+ performance metrics.</p></div>
+        <div class="feature-card"><div class="feature-icon">✦</div><h3 style="font-size:14px;font-weight:700;margin-bottom:6px">AI Trading Coach</h3><p style="font-size:12px;color:var(--text3);line-height:1.7">Personalised AI feedback, pattern detection, and weekly coaching reports.</p></div>
+        <div class="feature-card"><div class="feature-icon">🔗</div><h3 style="font-size:14px;font-weight:700;margin-bottom:6px">Broker Integration</h3><p style="font-size:12px;color:var(--text3);line-height:1.7">Connect MT4/MT5 and auto-import all trades with one click.</p></div>
+        <div class="feature-card"><div class="feature-icon">🏆</div><h3 style="font-size:14px;font-weight:700;margin-bottom:6px">Global Leaderboard</h3><p style="font-size:12px;color:var(--text3);line-height:1.7">Compete with 12,000+ traders and track your rank in real time.</p></div>
+        <div class="feature-card"><div class="feature-icon">📅</div><h3 style="font-size:14px;font-weight:700;margin-bottom:6px">Trading Calendar</h3><p style="font-size:12px;color:var(--text3);line-height:1.7">View your daily P&L on a calendar. Spot patterns in your trading schedule.</p></div>
+        <div class="feature-card"><div class="feature-icon">⚡</div><h3 style="font-size:14px;font-weight:700;margin-bottom:6px">Real-time Dashboard</h3><p style="font-size:12px;color:var(--text3);line-height:1.7">Live P&L, open positions, equity curve and performance meters — all in one view.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div id="pricing" class="landing-section">
+    <h2>Simple, transparent pricing</h2>
+    <p class="sub">Start free. Upgrade when you're ready.</p>
+    <div class="g3">
+      <div class="pricing-card">
+        <div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:8px">STARTER</div>
+        <div class="price-amount">$0<span style="font-size:14px;font-weight:400;color:var(--text3)">/mo</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:18px">Forever free</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> 50 trades/month</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Basic analytics</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> 1 broker account</div>
+        <div class="price-feature" style="color:var(--text4)"><span>✗</span> AI Coach</div>
+        <div class="price-feature" style="color:var(--text4)"><span>✗</span> Leaderboard</div>
+        <button onclick="showPage('register')" class="btn btn-outline btn-full" style="margin-top:20px">Get Started Free</button>
+      </div>
+      <div class="pricing-card popular">
+        <div style="display:inline-block;background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;margin-bottom:8px">MOST POPULAR</div>
+        <div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:8px">PRO</div>
+        <div class="price-amount">$29<span style="font-size:14px;font-weight:400;color:var(--text3)">/mo</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:18px">Billed monthly</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Unlimited trades</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Full analytics suite</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> 3 broker accounts</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> AI Trading Coach</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Leaderboard access</div>
+        <button onclick="showPage('register')" class="btn btn-primary btn-full" style="margin-top:20px">Start Pro Trial</button>
+      </div>
+      <div class="pricing-card">
+        <div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:8px">ELITE</div>
+        <div class="price-amount">$79<span style="font-size:14px;font-weight:400;color:var(--text3)">/mo</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:18px">For pro traders</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Everything in Pro</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Unlimited accounts</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Priority AI analysis</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> White-label reports</div>
+        <div class="price-feature"><span style="color:var(--green)">✓</span> Team workspace</div>
+        <button onclick="showPage('register')" class="btn btn-outline btn-full" style="margin-top:20px">Go Elite</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div id="faq" class="landing-section" style="background:var(--bg2);margin:0;max-width:100%;padding:60px 0">
+    <div style="max-width:700px;margin:0 auto;padding:0 24px">
+      <h2 style="text-align:center;margin-bottom:10px">FAQ</h2>
+      <p class="sub">Frequently asked questions</p>
+      <div id="faq-list"></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div style="max-width:1100px;margin:0 auto;padding:60px 24px">
+    <div style="background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(124,58,237,.1));border:1px solid rgba(59,130,246,.2);border-radius:20px;padding:52px;text-align:center">
+      <h2 style="font-size:28px;font-weight:900;margin-bottom:10px;letter-spacing:-.5px">Ready to level up your trading?</h2>
+      <p style="font-size:14px;color:var(--text3);margin-bottom:24px">Join 12,000+ serious traders already using TrackingTrade</p>
+      <button onclick="showPage('register')" class="btn btn-primary" style="font-size:15px;padding:13px 30px">Start Free Trial →</button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="background:var(--bg2);border-top:1px solid var(--border);padding:32px 24px">
+    <div style="max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:13px">📈</div>
+        <span style="font-size:14px;font-weight:800">Tracking<span style="color:var(--blue2)">Trade</span></span>
+      </div>
+      <div style="font-size:12px;color:var(--text3)">© 2025 TrackingTrade. Built for serious traders.</div>
+      <div style="display:flex;gap:16px;font-size:12px;color:var(--text3)">
+        <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Support</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     AUTH PAGES
+══════════════════════════════════════════════ -->
+<div id="login-page" style="display:none">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">📈</div>
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-sub">Sign in to your trading journal</div>
+      </div>
+      <div class="tt-alert tt-alert-error" id="login-alert" style="display:none"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="login-email" placeholder="john@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="login-pass" placeholder="••••••••"></div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="lnk" onclick="showPage('forgot')">Forgot password?</button></div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">Sign In</button>
+      <div class="auth-divider"><span>or</span></div>
+      <div class="g2" style="gap:8px">
+        <button class="btn btn-outline" style="justify-content:center" onclick="showToast('Google OAuth coming soon','info')">🌐 Google</button>
+        <button class="btn btn-outline" style="justify-content:center" onclick="showToast('Apple ID coming soon','info')">🍎 Apple</button>
+      </div>
+      <div class="auth-footer">No account? <button class="lnk" onclick="showPage('register')">Create one free →</button></div>
+      <div style="text-align:center;margin-top:12px">
+        <button class="lnk" onclick="showPage('landing')" style="color:var(--text3)">← Back to home</button>
+        &nbsp;&nbsp;
+        <button onclick="toggleTheme()" style="background:none;border:none;font-size:18px;cursor:pointer" id="login-theme-btn">☀️</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="register-page" style="display:none">
+  <div class="auth-wrap">
+    <div class="auth-card" style="width:460px">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">📈</div>
+        <div class="auth-title">Create your account</div>
+        <div class="auth-sub">14-day free trial · No credit card needed</div>
+      </div>
+      <div class="tt-alert tt-alert-error" id="reg-alert" style="display:none"></div>
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="reg-name" placeholder="John Doe"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="reg-email" placeholder="john@example.com"></div>
+      <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="reg-pass"placeholder="Min 8 chars, 1 Uppercase, 1 Number, 1 Symbol"></div>
+      <button class="btn btn-primary btn-full" id="reg-btn" onclick="doRegister()" style="margin-top:4px">Create Account</button>
+      <div class="auth-footer">Already have an account? <button class="lnk" onclick="showPage('login')">Sign in</button></div>
+      <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text3)">
+        By signing up you agree to our <a href="#" style="color:var(--blue2)">Terms</a> and <a href="#" style="color:var(--blue2)">Privacy Policy</a>
+      </div>
+      <div style="text-align:center;margin-top:10px">
+        <button class="lnk" onclick="showPage('landing')" style="color:var(--text3)">← Back to home</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="forgot-page" style="display:none">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🔐</div>
+        <div class="auth-title">Reset Password</div>
+        <div class="auth-sub">
+          Enter your email to receive reset link
+        </div>
+      </div>
+
+      <div class="tt-alert tt-alert-error"
+           id="forgot-alert"
+           style="display:none"></div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email"
+               class="form-input"
+               id="forgot-email"
+               placeholder="john@example.com">
+      </div>
+
+      <button class="btn btn-primary btn-full"
+              onclick="forgotPassword()">
+        Send Reset Link
+      </button>
+
+      <div class="auth-footer">
+        <button class="lnk"
+                onclick="showPage('login')">
+          ← Back to Login
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ══════════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════════ -->
+<div id="app-page" style="display:none">
+<div id="app">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark">📈</div>
+    <div class="sb-logo-text">Tracking<span>Trade</span></div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">MAIN</div>
+    <button class="sb-item active" data-page="dashboard"><span class="sb-icon">⊞</span><span class="sb-label">Dashboard</span></button>
+    <button class="sb-item" data-page="trades"><span class="sb-icon">⇄</span><span class="sb-label">Trades</span><span class="sb-badge" id="trades-count"></span></button>
+    <button class="sb-item" data-page="analytics"><span class="sb-icon">◎</span><span class="sb-label">Analytics</span></button>
+    <button class="sb-item" data-page="calendar"><span class="sb-icon">▦</span><span class="sb-label">Calendar</span></button>
+    <div class="sb-section">TOOLS</div>
+    <button class="sb-item" data-page="accounts"><span class="sb-icon">◈</span><span class="sb-label">Accounts</span></button>
+    <button class="sb-item" data-page="ai"><span class="sb-icon">✦</span><span class="sb-label">AI Insights</span><span class="sb-badge new">AI</span></button>
+    <button class="sb-item" data-page="leaderboard"><span class="sb-icon">▲</span><span class="sb-label">Leaderboard</span></button>
+    <div class="sb-section">ACCOUNT</div>
+    <button class="sb-item" data-page="settings"><span class="sb-icon">⚙</span><span class="sb-label">Settings</span></button>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-user" onclick="switchPage('settings')">
+      <div class="tt-avatar user-avatar">JD</div>
+      <div class="sb-user-info">
+        <div class="sb-user-name user-name">Loading...</div>
+        <div class="sb-user-plan user-plan">PRO</div>
+      </div>
+    </div>
+    <button onclick="Auth.logout()" style="width:100%;margin-top:6px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:7px;color:var(--red2);cursor:pointer;font-size:12px;font-weight:600">Sign Out</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topbar">
+    <button class="icon-btn" id="sb-toggle">☰</button>
+    <div style="flex:1">
+      <div class="tb-page-title" id="page-title">Dashboard</div>
+      <div class="tb-bc">TrackingTrade <span id="bc-page">/ Dashboard</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="live-dot" title="Live data"></div>
+      <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">☀️</button>
+      <div class="tt-avatar user-avatar" style="cursor:pointer" onclick="switchPage('settings')">JD</div>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <div class="tt-page active" id="page-dashboard">
+      <div class="page-hdr">
+        <div><h1 id="dash-greeting">Good morning 👋</h1><p id="dash-date">Loading...</p></div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="g4" style="margin-bottom:16px" id="kpi-row">
+        <div class="kpi-card" onclick="switchPage('analytics')">
+          <div class="kpi-glow" style="background:#3b82f6"></div>
+          <div class="kpi-icon" style="background:rgba(59,130,246,.12)">💰</div>
+          <div class="kpi-label">Total P&L</div>
+          <div class="kpi-value text-green" id="kpi-pnl">—</div>
+          <div class="kpi-footer" id="kpi-pnl-foot">Loading...</div>
+        </div>
+        <div class="kpi-card" onclick="switchPage('analytics')">
+          <div class="kpi-glow" style="background:#10b981"></div>
+          <div class="kpi-icon" style="background:rgba(16,185,129,.12)">🎯</div>
+          <div class="kpi-label">Win Rate</div>
+          <div class="kpi-value text-blue" id="kpi-wr">—</div>
+          <div class="kpi-footer" id="kpi-wr-foot">Loading...</div>
+        </div>
+        <div class="kpi-card" onclick="switchPage('analytics')">
+          <div class="kpi-glow" style="background:#ef4444"></div>
+          <div class="kpi-icon" style="background:rgba(239,68,68,.12)">📉</div>
+          <div class="kpi-label">Profit Factor</div>
+          <div class="kpi-value text-amber" id="kpi-pf">—</div>
+          <div class="kpi-footer" id="kpi-pf-foot">Loading...</div>
+        </div>
+        <div class="kpi-card" onclick="switchPage('analytics')">
+          <div class="kpi-glow" style="background:#8b5cf6"></div>
+          <div class="kpi-icon" style="background:rgba(139,92,246,.12)">⚡</div>
+          <div class="kpi-label">Total Trades</div>
+          <div class="kpi-value text-purple" id="kpi-trades">—</div>
+          <div class="kpi-footer" id="kpi-trades-foot">Loading...</div>
+        </div>
+      </div>
+
+      <!-- Secondary KPIs -->
+      <div class="g4" style="margin-bottom:16px">
+        <div class="card-sm" style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">🏆</span><div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Best Pair</div><div style="font-size:18px;font-weight:800;color:var(--blue2)" id="kpi-best-pair">—</div></div></div>
+        <div class="card-sm" style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">📈</span><div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Best Trade</div><div style="font-size:18px;font-weight:800;color:var(--green2)" id="kpi-best-trade">—</div></div></div>
+        <div class="card-sm" style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">📉</span><div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Worst Trade</div><div style="font-size:18px;font-weight:800;color:var(--red2)" id="kpi-worst-trade">—</div></div></div>
+        <div class="card-sm" style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">💎</span><div><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em">Expectancy</div><div style="font-size:18px;font-weight:800;color:var(--blue2)" id="kpi-exp">—</div></div></div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="sec-head">
+            <div><div class="sec-title">Equity Curve</div><div class="sec-sub">Account growth over time</div></div>
+          </div>
+          <div style="height:190px"><canvas id="dash-equity-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="sec-head">
+            <div><div class="sec-title">Monthly P&L</div><div class="sec-sub">This year breakdown</div></div>
+          </div>
+          <div style="height:190px"><canvas id="dash-monthly-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Recent Trades -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="sec-head" style="padding:16px 18px 0">
+          <div class="sec-title">Recent Trades</div>
+          <button class="lnk" onclick="switchPage('trades')">View all →</button>
+        </div>
+        <div id="dash-recent-trades"><div class="tt-loader"><div class="tt-spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ TRADES ═══ -->
+    <div class="tt-page" id="page-trades">
+      <div class="page-hdr">
+        <div><h1>Trade Journal</h1><p>Log, manage and review every trade</p></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="exportTrades()">📥 Export</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddTrade()">+ Add Trade</button>
+        </div>
+      </div>
+
+      <!-- Trade Stats -->
+      <div class="g4" style="margin-bottom:16px">
+        <div class="card-sm"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:5px">Total P&L</div><div style="font-size:19px;font-weight:800" id="t-total-pnl">—</div></div>
+        <div class="card-sm"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:5px">Win / Loss</div><div style="font-size:19px;font-weight:800" id="t-wl">—</div></div>
+        <div class="card-sm"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:5px">Best Trade</div><div style="font-size:19px;font-weight:800 text-green" id="t-best">—</div></div>
+        <div class="card-sm"><div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase;margin-bottom:5px">Worst Trade</div><div style="font-size:19px;font-weight:800" id="t-worst">—</div></div>
+      </div>
+
+      <!-- Filters -->
+      <div class="tt-search-bar">
+        <div class="tt-search-wrap" style="flex:2"><input class="form-input" id="trade-search" placeholder="Search pair, strategy, notes…" oninput="filterTrades()" style="padding-left:34px"></div>
+        <select class="form-select" id="trade-type-filter" onchange="filterTrades()" style="width:110px"><option value="">All Types</option><option value="BUY">BUY</option><option value="SELL">SELL</option></select>
+        <select class="form-select" id="trade-status-filter" onchange="filterTrades()" style="width:120px"><option value="">All Results</option><option value="Win">Wins</option><option value="Loss">Losses</option></select>
+        <select class="form-select" id="trade-pair-filter" onchange="filterTrades()" style="width:120px"><option value="">All Pairs</option></select>
+      </div>
+
+      <!-- Table -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="tt-table-wrap">
+          <table class="tt-table">
+            <thead><tr>
+              <th>#</th><th>Pair</th><th>Type</th><th>Lots</th>
+              <th>Entry</th><th>Exit</th><th>P&L</th><th>RR</th>
+              <th>Strategy</th><th>Date</th><th></th>
+            </tr></thead>
+            <tbody id="trades-tbody"></tbody>
+          </table>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-top:1px solid var(--border)">
+          <span id="trades-count-label" style="font-size:12px;color:var(--text3)"></span>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-outline btn-sm">‹ Prev</button>
+            <button class="btn btn-outline btn-sm" style="border-color:var(--blue);color:var(--blue2)">1</button>
+            <button class="btn btn-outline btn-sm">Next ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ANALYTICS ═══ -->
+    <div class="tt-page" id="page-analytics">
+      <div class="page-hdr"><div><h1>Analytics</h1><p>Deep performance insights and risk analysis</p></div></div>
+
+      <div class="g4" style="margin-bottom:16px">
+        <div class="kpi-card"><div class="kpi-label">Sharpe Ratio</div><div class="kpi-value text-blue" id="an-sharpe">—</div><div class="kpi-footer">Risk-adjusted return</div></div>
+        <div class="kpi-card"><div class="kpi-label">Avg RRR</div><div class="kpi-value text-green" id="an-rrr">—</div><div class="kpi-footer">Reward/risk per trade</div></div>
+        <div class="kpi-card"><div class="kpi-label">Expectancy</div><div class="kpi-value text-blue" id="an-exp">—</div><div class="kpi-footer">Per trade average</div></div>
+        <div class="kpi-card"><div class="kpi-label">Win Rate</div><div class="kpi-value text-green" id="an-wr">—</div><div class="kpi-footer">All closed trades</div></div>
+      </div>
+
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card"><div class="sec-head"><div class="sec-title">Equity Curve</div></div><div style="height:200px"><canvas id="an-equity-chart"></canvas></div></div>
+        <div class="card"><div class="sec-head"><div class="sec-title">Win / Loss Distribution</div></div><div style="height:200px"><canvas id="an-wl-chart"></canvas></div></div>
+      </div>
+
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card"><div class="sec-head"><div class="sec-title">Asset Performance</div></div><div style="height:200px"><canvas id="an-asset-chart"></canvas></div></div>
+        <div class="card"><div class="sec-head"><div class="sec-title">Performance by Strategy</div></div><div id="an-strategy-list" style="padding-top:6px"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Session Performance</div><div class="sec-sub">Win rate by trading session</div></div>
+        <div id="an-session-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══ CALENDAR ═══ -->
+    <div class="tt-page" id="page-calendar">
+      <div class="page-hdr">
+        <div><h1>Trading Calendar</h1><p>Daily P&L and monthly performance</p></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="changeMonth(-1)">‹ Prev</button>
+          <button class="btn btn-outline btn-sm" onclick="changeMonth(1)">Next ›</button>
+        </div>
+      </div>
+
+      <div class="g3" style="margin-bottom:16px">
+        <div class="kpi-card"><div class="kpi-glow" style="background:#10b981"></div><div class="kpi-label" id="cal-month-label">Month P&L</div><div class="kpi-value text-green" id="cal-pnl">—</div><div class="kpi-footer" id="cal-days">Loading...</div></div>
+        <div class="kpi-card"><div class="kpi-label">Win Days</div><div class="kpi-value text-green" id="cal-win-days">—</div><div class="kpi-footer">Profitable days</div></div>
+        <div class="kpi-card"><div class="kpi-label">Loss Days</div><div class="kpi-value text-red" id="cal-loss-days">—</div><div class="kpi-footer">Unprofitable days</div></div>
+      </div>
+
+      <div class="card">
+        <div class="sec-head"><div class="sec-title" id="cal-title">Loading...</div></div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div style="display:flex;gap:16px;padding-top:14px;font-size:11px;color:var(--text3)">
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(16,185,129,.25);border:1px solid rgba(16,185,129,.4);display:inline-block"></span>Profit day</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(239,68,68,.25);border:1px solid rgba(239,68,68,.4);display:inline-block"></span>Loss day</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;border:1px solid rgba(59,130,246,.5);display:inline-block"></span>Today</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ ACCOUNTS ═══ -->
+    <div class="tt-page" id="page-accounts">
+      <div class="page-hdr">
+        <div><h1>Trading Accounts</h1><p>Manage broker connections</p></div>
+        <button class="btn btn-primary btn-sm" onclick="openAddAccount()">+ Connect Broker</button>
+      </div>
+      <div id="accounts-grid" class="g3" style="margin-bottom:16px"><div class="tt-loader"><div class="tt-spinner"></div></div></div>
+      <div class="card">
+        <div class="sec-head"><div class="sec-title">Supported Platforms</div></div>
+        <div class="g4">
+          <div class="card-sm" style="text-align:center;cursor:pointer" onclick="openAddAccount()"><div style="font-size:24px;margin-bottom:6px">🏦</div><div style="font-size:12px;font-weight:600">MetaTrader 5</div><div style="font-size:10px;color:var(--text3)">MT5</div></div>
+          <div class="card-sm" style="text-align:center;cursor:pointer" onclick="openAddAccount()"><div style="font-size:24px;margin-bottom:6px">💹</div><div style="font-size:12px;font-weight:600">MetaTrader 4</div><div style="font-size:10px;color:var(--text3)">MT4</div></div>
+          <div class="card-sm" style="text-align:center;cursor:pointer" onclick="openAddAccount()"><div style="font-size:24px;margin-bottom:6px">📊</div><div style="font-size:12px;font-weight:600">cTrader</div><div style="font-size:10px;color:var(--text3)">FX & CFD</div></div>
+          <div class="card-sm" style="text-align:center;cursor:pointer" onclick="openAddAccount()"><div style="font-size:24px;margin-bottom:6px">🔐</div><div style="font-size:12px;font-weight:600">TradeLocker</div><div style="font-size:10px;color:var(--text3)">Prop firms</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ AI INSIGHTS ═══ -->
+    <div class="tt-page" id="page-ai">
+      <div class="page-hdr">
+        <div><h1>AI Trading Coach ✦</h1><p>Personalised insights powered by pattern-recognition AI</p></div>
+        <button class="btn btn-primary btn-sm" id="gen-ai-btn" onclick="generateAI()">✦ Generate Insights</button>
+      </div>
+
+      <!-- Scores -->
+      <div class="g3" style="margin-bottom:16px" id="ai-scores-row">
+        <div class="tt-loader" style="grid-column:1/-1"><div class="tt-spinner"></div></div>
+      </div>
+
+      <div class="g2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="sec-head"><div class="sec-title">✦ AI Recommendations</div><span class="badge badge-purple">AI Powered</span></div>
+          <div id="ai-recs-list"><div class="tt-loader"><div class="tt-spinner"></div></div></div>
+        </div>
+        <div class="card">
+          <div class="sec-head"><div class="sec-title">Best Trading Hours</div><div class="sec-sub">UTC hours — darker = higher win rate</div></div>
+          <div id="ai-hours-grid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:8px"></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:8px">Based on your closed trades analysis</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ LEADERBOARD ═══ -->
+    <div class="tt-page" id="page-leaderboard">
+      <div class="page-hdr"><div><h1>Global Leaderboard</h1><p>Top traders ranked by monthly performance</p></div></div>
+      <div class="g3" style="margin-bottom:16px">
+        <div class="kpi-card"><div class="kpi-glow" style="background:#3b82f6"></div><div class="kpi-label">Your Rank</div><div class="kpi-value text-blue" id="lb-rank">—</div><div class="kpi-footer">This month</div></div>
+        <div class="kpi-card"><div class="kpi-label">Your Points</div><div class="kpi-value text-purple" id="lb-points">—</div><div class="kpi-footer">Performance score</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total Traders</div><div class="kpi-value text-amber" id="lb-total">—</div><div class="kpi-footer">On platform</div></div>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="sec-head" style="padding:16px 18px 0">
+          <div class="sec-title">🏆 Rankings</div>
+          <button class="btn btn-outline btn-sm" onclick="updateLeaderboard()">Update My Stats</button>
+        </div>
+        <div id="lb-list" style="padding:14px"><div class="tt-loader"><div class="tt-spinner"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ═══ SETTINGS ═══ -->
+    <div class="tt-page" id="page-settings">
+      <div class="page-hdr"><div><h1>Settings</h1><p>Manage your account preferences</p></div></div>
+      <div class="g2">
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="sec-title" style="margin-bottom:16px">Profile</div>
+            <div class="tt-alert tt-alert-success" id="profile-ok" style="display:none">Profile updated!</div>
+            <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="s-name"></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="s-email" disabled style="opacity:.6"></div>
+            <div class="form-group"><label class="form-label">Timezone</label>
+              <select class="form-select" id="s-timezone">
+                <option>UTC+5:30 (IST)</option><option>UTC+0 (GMT)</option>
+                <option>UTC-5 (EST)</option><option>UTC+8 (SGT)</option><option>UTC+1 (CET)</option>
+              </select>
+            </div>
+            <div class="form-group"><label class="form-label">Currency Display</label>
+              <select class="form-select" id="s-currency">
+                <option>USD ($)</option><option>EUR (€)</option><option>GBP (£)</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+          </div>
+          <div class="card">
+            <div class="sec-title" style="margin-bottom:14px">Subscription</div>
+            <div style="background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(124,58,237,.08));border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:14px">
+              <span style="font-size:24px">⚡</span>
+              <div><div style="font-size:14px;font-weight:700" id="s-plan-name">Pro Plan</div><div style="font-size:12px;color:var(--blue2)">Renews monthly</div></div>
+              <span class="badge badge-green" style="margin-left:auto">Active</span>
+            </div>
+            <button class="btn btn-primary" onclick="showToast('💎 Upgrade to Elite coming soon!','info')">Upgrade to Elite</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:14px">
+            <div class="sec-title" style="margin-bottom:14px">Notifications</div>
+            <div id="notif-settings"></div>
+          </div>
+          <div class="card">
+            <div class="sec-title" style="margin-bottom:14px">Security</div>
+            <div id="sec-settings"></div>
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn btn-danger btn-sm" onclick="showToast('📧 Password reset email sent!','success')">Change Password</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('📱 2FA setup coming soon!','info')">Setup 2FA</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+</div><!-- /app-page -->
+
+<!-- ══════════════════════════════════════════════
+     ADD TRADE MODAL
+══════════════════════════════════════════════ -->
+<div class="tt-modal-overlay" id="add-trade-modal" style="display:none" onclick="if(event.target===this)closeAddTrade()">
+  <div class="tt-modal">
+    <div class="tt-modal-hdr">
+      <div class="tt-modal-title">➕ <span id="trade-modal-title">Add New Trade</span></div>
+      <button class="tt-modal-close" onclick="closeAddTrade()">✕</button>
+    </div>
+    <div class="tt-alert tt-alert-error" id="trade-modal-alert" style="display:none"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Pair *</label>
+        <select class="form-select" id="tm-pair"><option>EURUSD</option><option>GBPUSD</option><option>XAUUSD</option><option>USDJPY</option><option>BTCUSD</option><option>NZDUSD</option><option>AUDUSD</option><option>USDCAD</option><option>GBPJPY</option><option>ETHUSD</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Direction *</label>
+        <select class="form-select" id="tm-type"><option value="BUY">BUY (Long)</option><option value="SELL">SELL (Short)</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Entry Price *</label><input class="form-input font-mono" id="tm-entry" placeholder="1.08450" type="number" step="any"></div>
+      <div class="form-group"><label class="form-label">Exit Price</label><input class="form-input font-mono" id="tm-exit" placeholder="1.08920" type="number" step="any"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Stop Loss</label><input class="form-input font-mono" id="tm-sl" placeholder="1.08200" type="number" step="any"></div>
+      <div class="form-group"><label class="form-label">Take Profit</label><input class="form-input font-mono" id="tm-tp" placeholder="1.09100" type="number" step="any"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Lot Size *</label><input class="form-input" id="tm-lots" placeholder="0.10" type="number" step="0.01" value="0.10"></div>
+      <div class="form-group"><label class="form-label">Open Time *</label><input class="form-input" id="tm-open" type="datetime-local"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Close Time</label><input class="form-input" id="tm-close" type="datetime-local"></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-select" id="tm-status"><option value="open">Open</option><option value="closed" selected>Closed</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Strategy</label>
+        <select class="form-select" id="tm-strategy"><option>Trend Follow</option><option>Breakout</option><option>Reversal</option><option>Scalp</option><option>Swing</option><option>Other</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Session</label>
+        <select class="form-select" id="tm-session"><option>London</option><option>New York</option><option>Asian</option><option>London/NY</option><option>Asian/London</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input form-textarea" id="tm-notes" placeholder="Trade setup, rationale, lessons learned…"></textarea></div>
+    <div class="tt-modal-footer">
+      <button class="btn btn-outline" onclick="closeAddTrade()">Cancel</button>
+      <button class="btn btn-primary" id="save-trade-btn" onclick="saveTrade()">Save Trade</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRADE DRAWER -->
+<div class="tt-drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+
+<div class="tt-drawer closed" id="trade-drawer">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <h3 id="drawer-title" style="font-size:15px;font-weight:800"></h3>
+
+    <button class="btn btn-outline btn-sm" onclick="closeDrawer()">
+      ✕ Close
+    </button>
+  </div>
+
+  <div id="drawer-body"></div>
+
+  <!-- ENTRY EXIT CARDS -->
+  <div id="trade-levels"
+       style="
+       display:grid;
+       grid-template-columns:repeat(4,1fr);
+       gap:10px;
+       margin-top:15px;
+       margin-bottom:15px;">
+  </div>
+
+  <!-- TRADINGVIEW CHART -->
+  <div id="tv-chart-container"
+       style="
+         margin-top:20px;
+         height:500px;
+         border-radius:12px;
+         overflow:hidden;
+         border:1px solid rgba(255,255,255,0.08);
+       ">
+  </div>
+
+</div>
+
+<!-- ADD ACCOUNT MODAL -->
+<div class="tt-modal-overlay" id="add-account-modal" style="display:none" onclick="if(event.target===this)closeAddAccount()">
+  <div class="tt-modal" style="width:460px">
+    <div class="tt-modal-hdr"><div class="tt-modal-title">🏦 Connect Broker Account</div><button class="tt-modal-close" onclick="closeAddAccount()">✕</button></div>
+    <div class="tt-alert tt-alert-error" id="acct-modal-alert" style="display:none"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Account Name *</label><input class="form-input" id="am-name" placeholder="e.g. FTMO Live #1"></div>
+      <div class="form-group"><label class="form-label">Broker *</label><input class="form-input" id="am-broker" placeholder="e.g. FTMO, IC Markets"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Platform</label>
+        <select class="form-select" id="am-platform"><option>MT5</option><option>MT4</option><option>cTrader</option><option>TradeLocker</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Account Type</label>
+        <select class="form-select" id="am-type"><option>Demo</option><option>Live</option><option>Prop Firm</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Account Number</label><input class="form-input" id="am-number" placeholder="#1234567"></div>
+      <div class="form-group"><label class="form-label">Starting Balance ($)</label><input class="form-input" id="am-balance" type="number" placeholder="10000"></div>
+    </div>
+    <div class="tt-modal-footer">
+      <button class="btn btn-outline" onclick="closeAddAccount()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAccount()">Connect Account</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="js/config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/utils.js"></script>
+<script>
+// ══ APP STATE ══════════════════════════════════
+let allTrades = [], filteredTrades = [], allAccounts = [];
+let editTradeId = null;
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let dashCharts = {}, analyticsCharts = {};
+
+// ══ PAGE ROUTING ═══════════════════════════════
+function showPage(page) {
+  ['landing','login','register','forgot','app'].forEach(p => {
+    const el = document.getElementById(p + '-page');
+    if (el) el.style.display = 'none';
+  });
+
+  const target = document.getElementById(page + '-page');
+  if (target) target.style.display = 'block';
+
+   // updateThemeBtn();
+
+  ['land-theme-btn','login-theme-btn','theme-btn'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.textContent =
+      (localStorage.getItem('tt_theme') || 'dark') === 'dark'
+      ? '☀️'
+      : '🌙';
+  });
+
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'));
+  }, 300);
+}
+
+// ══ INIT ═══════════════════════════════════════
+// ══ INIT ═══════════════════════════════════════
+window.addEventListener('load', () => {
+
+  initTheme();
+  buildFAQ();
+
+  if (Auth.isLoggedIn()) {
+
+    showPage('app');
+    initApp();
+
+    setTimeout(() => {
+      loadDashboard();
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
+
+  } else {
+
+    showPage('landing');
+
+  }
+
+  document.getElementById('login-pass')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+});
+
+// ══ AUTH ═══════════════════════════════════════
+// ══ AUTH ═══════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const btn   = document.getElementById('login-btn');
+
+  if (!email || !pass) {
+    showAlert('Please enter email and password', 'error', 'login-alert');
+    return;
+  }
+
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
+  hideAlert('login-alert');
+
+  try {
+    const res = await API.auth.login({ email, password: pass });
+
+    console.log("FULL RESPONSE:", res);
+    console.log("TOKEN:", res.token);
+    console.log("USER:", res.user);
+
+    Auth.login(res.token, res.user);
+
+    console.log("1");
+
+    showPage('app');
+    console.log("2");
+
+    await initApp();
+    console.log("3");
+
+    setTimeout(() => {
+      console.log("4");
+
+      loadDashboard();
+
+      console.log("5");
+
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
+
+  } catch (e) {
+    console.error("LOGIN ERROR:", e);
+
+    showAlert(
+      e.message || 'Login failed',
+      'error',
+      'login-alert'
+    );
+
+    btn.textContent = 'Sign In';
+    btn.disabled = false;
+  }
+}
+
+// ══ REGISTER ═══════════════════════════════════
+async function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const btn   = document.getElementById('reg-btn');
+
+  if (!name || !email || !pass) {
+    showAlert('Please fill all fields', 'error', 'reg-alert');
+    return;
+  }
+
+  if (pass.length < 6) {
+    showAlert('Password must be at least 6 characters', 'error', 'reg-alert');
+    return;
+  }
+
+  btn.textContent = 'Creating...';
+  btn.disabled = true;
+
+  try {
+    const res = await API.auth.register({
+      name,
+      email,
+      password: pass
+    });
+
+    Auth.login(res.token, res.user);
+
+    showPage('app');
+    await initApp();
+
+    setTimeout(() => {
+      loadDashboard();
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
+
+  } catch (e) {
+    showAlert(
+      e.message || 'Registration failed',
+      'error',
+      'reg-alert'
+    );
+
+    btn.textContent = 'Create Account';
+    btn.disabled = false;
+  }
+}
+
+async function doForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) return;
+  showToast('📧 Reset email sent!', 'success');
+  setTimeout(() => showPage('login'), 1500);
+}
+
+// ══ APP INIT ════════════════════════════════════
+async function initApp() {
+  try {
+    console.log("STEP 1");
+    fillUserInfo();
+
+    console.log("STEP 2");
+    initSidebar();
+
+    console.log("STEP 3");
+    setGreeting();
+
+    console.log("STEP 4");
+    await loadDashboard();
+
+    console.log("STEP 5");
+    await loadTrades();
+
+    console.log("STEP 6");
+    await loadAccounts();
+
+    console.log("STEP 7");
+    await loadCalendar();
+
+    console.log("STEP 8");
+    await loadLeaderboard();
+
+    console.log("STEP 9");
+    await loadAI();
+
+    console.log("STEP 10");
+    await loadSettings();
+
+    console.log("INIT COMPLETE");
+  } catch (err) {
+    console.error("INIT ERROR:", err);
+    console.error(err.stack);
+  }
+}
+function setGreeting() {
+  const user = Auth.getUser();
+  const el   = document.getElementById('dash-greeting');
+  if (el) el.textContent = `${getGreeting()}, ${user?.name?.split(' ')[0] || 'Trader'} 👋`;
+  const dateEl = document.getElementById('dash-date');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+// ══ DASHBOARD ══════════════════════════════════
+async function loadDashboard() {
+  try {
+    const [overviewRes, equityRes, monthlyRes] = await Promise.all([
+      API.analytics.overview(),
+      API.analytics.equityCurve(),
+      API.analytics.monthly(),
+    ]);
+    const ov = overviewRes.overview;
+
+    // KPIs
+    const pnlEl = document.getElementById('kpi-pnl');
+    if (pnlEl) {
+      pnlEl.textContent = formatPnL(ov.total_pnl);
+      pnlEl.className   = 'kpi-value ' + pnlColor(ov.total_pnl);
+    }
+    setText('kpi-pnl-foot',    `${ov.total_trades} trades · ${ov.wins}W ${ov.losses}L`);
+    setText('kpi-wr',          `${parseFloat(ov.win_rate || 0).toFixed(1)}%`);
+    setText('kpi-wr-foot',     `${ov.wins} wins / ${ov.losses} losses`);
+    setText('kpi-pf',          parseFloat(ov.profit_factor || 0).toFixed(2));
+    setText('kpi-pf-foot',     'Profit / Loss ratio');
+    setText('kpi-trades',      ov.total_trades || 0);
+    setText('kpi-trades-foot', 'All time');
+    setText('kpi-best-pair',   '—');
+    setText('kpi-best-trade',  formatPnL(ov.best_trade));
+    setText('kpi-worst-trade', formatPnL(ov.worst_trade));
+    setText('kpi-exp',         `$${parseFloat(ov.expectancy || 0).toFixed(1)}`);
+
+    // Analytics KPIs
+    setText('an-sharpe', '1.84'); // Calculated server-side ideally
+    setText('an-rrr', '1:2.1');
+    const expEl2 = document.getElementById('an-exp');
+    if (expEl2) { expEl2.textContent = `$${parseFloat(ov.expectancy || 0).toFixed(1)}`; }
+    const wrEl2 = document.getElementById('an-wr');
+    if (wrEl2) wrEl2.textContent = `${parseFloat(ov.win_rate || 0).toFixed(1)}%`;
+
+    // Trades count badge
+    setText('trades-count', ov.total_trades || '');
+
+    // Equity Chart
+    if (equityRes.equity_curve?.length) {
+      drawEquityChart('dash-equity-chart', equityRes.equity_curve);
+      drawEquityChart('an-equity-chart',   equityRes.equity_curve);
+    }
+
+    // Monthly Chart
+    if (monthlyRes.monthly?.length) {
+      drawMonthlyChart('dash-monthly-chart', monthlyRes.monthly);
+    }
+
+    // WL donut
+    drawWLChart('an-wl-chart', ov.wins || 0, ov.losses || 0);
+
+  } catch(e) { console.error('Dashboard load error:', e); }
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ══ TRADES ═════════════════════════════════════
+async function loadTrades() {
+  showLoader('dash-recent-trades');
+  try {
+    const res  = await API.trades.getAll();
+    allTrades  = res.trades || [];
+    filteredTrades = [...allTrades];
+
+    // Populate pair filter
+    const pairs    = [...new Set(allTrades.map(t => t.pair))].sort();
+    const pairSel  = document.getElementById('trade-pair-filter');
+    if (pairSel) {
+      pairSel.innerHTML = '<option value="">All Pairs</option>' + pairs.map(p => `<option>${p}</option>`).join('');
+    }
+
+    renderTradesTable(filteredTrades);
+    renderRecentTrades(allTrades.slice(0, 6));
+    updateTradeStats(allTrades);
+
+    // Asset chart
+    try {
+      const assetRes = await API.analytics.byPair();
+      drawAssetChart('an-asset-chart', assetRes.by_pair || []);
+      if (assetRes.by_pair?.length) setText('kpi-best-pair', assetRes.by_pair[0]?.pair || '—');
+    } catch {}
+
+    // Strategy list
+    try {
+      const stratRes = await API.analytics.byStrategy();
+      renderStrategyList(stratRes.by_strategy || []);
+    } catch {}
+
+    // Session list
+    try {
+      const sessRes = await API.analytics.bySession();
+      renderSessionList(sessRes.by_session || []);
+    } catch {}
+
+  } catch(e) {
+    showEmpty('dash-recent-trades', '📭', 'No trades yet', 'Add your first trade to get started');
+    console.error(e);
+  }
+}
+
+function updateTradeStats(trades) {
+  const wins   = trades.filter(t => t.status === 'Win').length;
+  const losses = trades.filter(t => t.status === 'Loss').length;
+  const pnl    = trades.reduce((s, t) => s + parseFloat(t.pnl || 0), 0);
+  const best   = Math.max(...trades.map(t => parseFloat(t.pnl || 0)), 0);
+  const worst  = Math.min(...trades.map(t => parseFloat(t.pnl || 0)), 0);
+
+  const pnlEl = document.getElementById('t-total-pnl');
+  if (pnlEl) { pnlEl.textContent = formatPnL(pnl); pnlEl.className = 'font-bold ' + pnlColor(pnl); }
+  setText('t-wl',    `${wins} / ${losses}`);
+  const bEl = document.getElementById('t-best');
+  if (bEl) { bEl.textContent = formatPnL(best); bEl.className = 'font-bold text-green'; }
+  const wEl = document.getElementById('t-worst');
+  if (wEl) { wEl.textContent = formatPnL(worst); wEl.className = 'font-bold text-red'; }
+  setText('trades-count-label', `${filteredTrades.length} of ${trades.length} trades`);
+}
+
+function renderRecentTrades(trades) {
+  const el = document.getElementById('dash-recent-trades');
+  if (!el) return;
+  if (!trades.length) {
+    el.innerHTML = `<div class="tt-empty"><div class="tt-empty-icon">📭</div><h3>No trades yet</h3><p>Add your first trade to see it here</p></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="tt-table-wrap"><table class="tt-table"><thead><tr><th>Pair</th><th>Type</th><th>Entry</th><th>Exit</th><th>P&L</th><th>RR</th><th>Status</th><th>Date</th></tr></thead><tbody>` +
+    trades.map(t => `<tr onclick="openDrawer(${t.id})">
+      <td class="font-bold text-blue">${t.pair}</td>
+      <td>${tradeBadge(t.type)}</td>
+      <td class="font-mono" style="font-size:12px">${t.entry_price}</td>
+      <td class="font-mono" style="font-size:12px">${t.exit_price || '—'}</td>
+      <td class="font-bold ${pnlColor(t.pnl)}">${formatPnL(parseFloat(t.pnl || 0))}</td>
+      <td>${t.rr_ratio ? `<span class="badge badge-blue">${t.rr_ratio}</span>` : '—'}</td>
+      <td>${statusBadge(t.status)}</td>
+      <td style="font-size:11px;color:var(--text3)">${formatDate(t.open_time)}</td>
+    </tr>`).join('') + `</tbody></table></div>`;
+}
+
+function renderTradesTable(trades) {
+  const tbody = document.getElementById('trades-tbody');
+  if (!tbody) return;
+  if (!trades.length) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:32px;color:var(--text3)">No trades found</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = trades.map(t => `<tr onclick="openDrawer(${t.id})">
+    <td style="color:var(--text3);font-size:11px">#${t.id}</td>
+    <td class="font-bold text-blue">${t.pair}</td>
+    <td>${tradeBadge(t.type)}</td>
+    <td class="font-mono" style="font-size:12px">${t.lots}</td>
+    <td class="font-mono" style="font-size:12px">${t.entry_price}</td>
+    <td class="font-mono" style="font-size:12px">${t.exit_price || '—'}</td>
+    <td class="font-bold ${pnlColor(t.pnl)}">${formatPnL(parseFloat(t.pnl || 0))}</td>
+    <td>${t.rr_ratio ? `<span class="badge badge-blue">${t.rr_ratio}</span>` : '—'}</td>
+    <td><span class="badge badge-neutral" style="font-size:10px">${t.strategy || '—'}</span></td>
+    <td style="font-size:11px;color:var(--text3)">${formatDate(t.open_time)}</td>
+    <td onclick="event.stopPropagation()" style="white-space:nowrap">
+      <button class="btn btn-outline btn-sm" onclick="openDrawer(${t.id})">View</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteTrade(${t.id})" style="margin-left:3px">✕</button>
+    </td>
+  </tr>`).join('');
+  setText('trades-count-label', `${trades.length} of ${allTrades.length} trades`);
+}
+
+function filterTrades() {
+  const q    = document.getElementById('trade-search').value.toLowerCase();
+  const type = document.getElementById('trade-type-filter').value;
+  const stat = document.getElementById('trade-status-filter').value;
+  const pair = document.getElementById('trade-pair-filter').value;
+  filteredTrades = allTrades.filter(t =>
+    (!q    || t.pair.toLowerCase().includes(q) || (t.strategy||'').toLowerCase().includes(q) || (t.notes||'').toLowerCase().includes(q)) &&
+    (!type || t.type === type) &&
+    (!stat || t.status === stat) &&
+    (!pair || t.pair === pair)
+  );
+  renderTradesTable(filteredTrades);
+}
+
+async function exportTrades() {
+  const rows = [['ID','Pair','Type','Lots','Entry','Exit','P&L','RR','Strategy','Session','Date','Notes']];
+  allTrades.forEach(t => rows.push([t.id, t.pair, t.type, t.lots, t.entry_price, t.exit_price||'', t.pnl, t.rr_ratio||'', t.strategy||'', t.session||'', t.open_time, t.notes||'']));
+  const csv  = rows.map(r => r.join(',')).join('\n');
+  const link = document.createElement('a');
+  link.href  = 'data:text/csv,' + encodeURIComponent(csv);
+  link.download = 'trades.csv';
+  link.click();
+  showToast('📥 Trades exported to CSV!', 'success');
+}
+
+// ══ TRADE DRAWER ════════════════════════════════
+function openDrawer(id) {
+  const t = allTrades.find(x => x.id === id);
+  if (!t) return;
+
+  loadTradingViewChart(t.pair);
+
+  document.getElementById('drawer-title').textContent =
+    `${t.pair} · ${t.type} · ${formatDate(t.open_time)}`;
+
+  const pc = parseFloat(t.pnl || 0);
+     document.getElementById('trade-levels').innerHTML = `
+  <div style="
+      padding:12px;
+      border-radius:10px;
+      text-align:center;
+      background:rgba(34,197,94,.15);
+      border:1px solid rgba(34,197,94,.3);">
+    📈 Entry<br>
+    <strong>${t.entry || t.entry_price || '-'}</strong>
+  </div>
+
+  <div style="
+      padding:12px;
+      border-radius:10px;
+      text-align:center;
+      background:rgba(239,68,68,.15);
+      border:1px solid rgba(239,68,68,.3);">
+    📉 Exit<br>
+    <strong>${t.exit || t.exit_price || '-'}</strong>
+  </div>
+
+  <div style="
+      padding:12px;
+      border-radius:10px;
+      text-align:center;
+      background:rgba(245,158,11,.15);
+      border:1px solid rgba(245,158,11,.3);">
+    🛑 SL<br>
+    <strong>${t.sl || t.stop_loss || '-'}</strong>
+  </div>
+
+  <div style="
+      padding:12px;
+      border-radius:10px;
+      text-align:center;
+      background:rgba(59,130,246,.15);
+      border:1px solid rgba(59,130,246,.3);">
+    🎯 TP<br>
+    <strong>${t.tp || t.take_profit || '-'}</strong>
+  </div>
+`;
+
+  document.getElementById('drawer-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      ${tradeBadge(t.type)} ${statusBadge(t.status)}
+      <span class="font-bold ${pnlColor(pc)}"
+            style="font-size:26px;margin-left:auto">
+        ${formatPnL(pc)}
+      </span>
+    </div>
+    ${[
+      ['Pair', t.pair], ['Direction', t.type], ['Lot Size', t.lots],
+      ['Entry Price', t.entry_price], ['Exit Price', t.exit_price || '—'],
+      ['Stop Loss', t.stop_loss || '—'], ['Take Profit', t.take_profit || '—'],
+      ['Risk:Reward', t.rr_ratio || '—'], ['Duration', t.duration || '—'],
+      ['Strategy', t.strategy || '—'], ['Session', t.session || '—'],
+      ['Status', t.status], ['Open Time', formatDateTime(t.open_time)],
+      ['Close Time', t.close_time ? formatDateTime(t.close_time) : '—'],
+    ].map(([l,v]) => `<div class="dr-row"><span class="dr-label">${l}</span><span class="dr-value">${v}</span></div>`).join('')}
+    ${t.notes ? `<div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.65"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px">NOTES</div>${t.notes}</div>` : ''}
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" style="flex:1" onclick="openEditTrade(${t.id})">✏️ Edit</button>
+      <button class="btn btn-danger" onclick="deleteTrade(${t.id});closeDrawer()">Delete</button>
+    </div>`;
+  document.getElementById('trade-drawer').classList.remove('closed');
+  document.getElementById('drawer-overlay').classList.add('visible');
+}
+
+function closeDrawer() {
+  document.getElementById('trade-drawer').classList.add('closed');
+  document.getElementById('drawer-overlay').classList.remove('visible');
+}
+
+// ══ ADD / EDIT TRADE ════════════════════════════
+function openAddTrade() {
+  editTradeId = null;
+  document.getElementById('trade-modal-title').textContent = 'Add New Trade';
+  document.getElementById('save-trade-btn').textContent = 'Save Trade';
+  clearTradeForm();
+  const now = new Date(); now.setSeconds(0, 0);
+  document.getElementById('tm-open').value = now.toISOString().slice(0, 16);
+  hideAlert('trade-modal-alert');
+  document.getElementById('add-trade-modal').style.display = 'flex';
+}
+
+function openEditTrade(id) {
+  const t = allTrades.find(x => x.id === id);
+  if (!t) return;
+  editTradeId = id;
+  document.getElementById('trade-modal-title').textContent = 'Edit Trade';
+  document.getElementById('save-trade-btn').textContent = 'Update Trade';
+  document.getElementById('tm-pair').value     = t.pair || 'EURUSD';
+  document.getElementById('tm-type').value     = t.type || 'BUY';
+  document.getElementById('tm-entry').value    = t.entry_price || '';
+  document.getElementById('tm-exit').value     = t.exit_price || '';
+  document.getElementById('tm-sl').value       = t.stop_loss || '';
+  document.getElementById('tm-tp').value       = t.take_profit || '';
+  document.getElementById('tm-lots').value     = t.lots || '0.10';
+  document.getElementById('tm-strategy').value = t.strategy || 'Trend Follow';
+  document.getElementById('tm-session').value  = t.session || 'London';
+  document.getElementById('tm-status').value   = t.status === 'open' ? 'open' : 'closed';
+  document.getElementById('tm-notes').value    = t.notes || '';
+  if (t.open_time)  document.getElementById('tm-open').value  = t.open_time.slice(0, 16);
+  if (t.close_time) document.getElementById('tm-close').value = t.close_time.slice(0, 16);
+  hideAlert('trade-modal-alert');
+  document.getElementById('add-trade-modal').style.display = 'flex';
+}
+
+function clearTradeForm() {
+  ['tm-entry','tm-exit','tm-sl','tm-tp','tm-notes','tm-close'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('tm-lots').value = '0.10';
+}
+
+function closeAddTrade() { document.getElementById('add-trade-modal').style.display = 'none'; editTradeId = null; }
+
+async function saveTrade() {
+  const pair      = document.getElementById('tm-pair').value;
+  const type      = document.getElementById('tm-type').value;
+  const entry     = parseFloat(document.getElementById('tm-entry').value);
+  const exit      = parseFloat(document.getElementById('tm-exit').value) || undefined;
+  const sl        = parseFloat(document.getElementById('tm-sl').value) || undefined;
+  const tp        = parseFloat(document.getElementById('tm-tp').value) || undefined;
+  const lots      = parseFloat(document.getElementById('tm-lots').value) || 0.1;
+  const openTime  = document.getElementById('tm-open').value;
+  const closeTime = document.getElementById('tm-close').value || undefined;
+  const strategy  = document.getElementById('tm-strategy').value;
+  const session   = document.getElementById('tm-session').value;
+  const notes     = document.getElementById('tm-notes').value.trim();
+  const status    = document.getElementById('tm-status').value;
+  const btn       = document.getElementById('save-trade-btn');
+
+  if (!pair || !entry || !openTime) { showAlert('Pair, entry price and open time are required', 'error', 'trade-modal-alert'); return; }
+
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    const data = { pair, type, lots, entry_price: entry, exit_price: exit, stop_loss: sl, take_profit: tp, open_time: openTime, close_time: closeTime, strategy, session, notes };
+    if (editTradeId) {
+      await API.trades.update(editTradeId, data);
+      showToast('Trade updated! ✅', 'success');
+    } else {
+      await API.trades.create(data);
+      showToast('Trade saved! 🎉', 'success');
+    }
+    closeAddTrade();
+    await loadTrades();
+    await loadDashboard();
+  } catch(e) {
+    showAlert(e.message || 'Failed to save trade', 'error', 'trade-modal-alert');
+  }
+  btn.disabled = false; btn.textContent = editTradeId ? 'Update Trade' : 'Save Trade';
+}
+
+async function deleteTrade(id) {
+  if (!confirm('Delete this trade permanently?')) return;
+  try {
+    await API.trades.delete(id);
+    allTrades = allTrades.filter(t => t.id !== id);
+    filteredTrades = filteredTrades.filter(t => t.id !== id);
+    renderTradesTable(filteredTrades);
+    renderRecentTrades(allTrades.slice(0, 6));
+    updateTradeStats(allTrades);
+    showToast('Trade deleted', 'info');
+  } catch(e) { showToast(e.message || 'Delete failed', 'error'); }
+}
+
+// ══ ANALYTICS ══════════════════════════════════
+function renderStrategyList(strategies) {
+  const el = document.getElementById('an-strategy-list');
+  if (!el || !strategies.length) { if(el) el.innerHTML = `<div class="tt-empty"><div class="tt-empty-icon">📊</div><h3>No data yet</h3></div>`; return; }
+  const max = Math.max(...strategies.map(s => parseFloat(s.win_rate || 0)));
+  el.innerHTML = strategies.map(s => {
+    const wr = parseFloat(s.win_rate || 0);
+    const color = wr >= 70 ? 'var(--green)' : wr >= 55 ? 'var(--blue)' : 'var(--amber)';
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+        <span style="color:var(--text2);font-weight:500">${s.strategy}</span>
+        <div style="display:flex;gap:10px;color:var(--text3)">
+          <span>${s.total_trades} trades</span>
+          <span style="font-weight:700;color:${color}">${wr.toFixed(1)}%</span>
+        </div>
+      </div>
+      <div class="tt-progress-track">
+        <div class="tt-progress-fill" style="width:${wr}%;background:${color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSessionList(sessions) {
+  const el = document.getElementById('an-session-list');
+  if (!el || !sessions.length) { if(el) el.innerHTML = `<div class="tt-empty"><div class="tt-empty-icon">🕐</div><h3>No session data yet</h3></div>`; return; }
+  el.innerHTML = sessions.map(s => {
+    const wr = parseFloat(s.win_rate || 0);
+    const color = wr >= 70 ? 'var(--green)' : wr >= 55 ? 'var(--blue)' : 'var(--amber)';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px;font-weight:500;width:120px;color:var(--text2)">${s.session}</span>
+      <div class="tt-progress-track" style="flex:1">
+        <div class="tt-progress-fill" style="width:${wr}%;background:${color}"></div>
+      </div>
+      <span style="font-size:12px;font-weight:700;color:${color};width:40px;text-align:right">${wr.toFixed(0)}%</span>
+      <span style="font-size:11px;color:var(--text3);width:60px;text-align:right">${s.total_trades} trades</span>
+    </div>`;
+  }).join('');
+}
+
+// ══ CALENDAR ═══════════════════════════════════
+async function loadCalendar() {
+  const monthStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  try {
+    const res = await API.analytics.calendar(monthStr);
+    renderCalendar(res.calendar || []);
+  } catch(e) { console.error(e); renderCalendar([]); }
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  loadCalendar();
+}
+
+function renderCalendar(data) {
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  setText('cal-title', `${MONTHS[calMonth]} ${calYear}`);
+  setText('cal-month-label', `${MONTHS[calMonth]} P&L`);
+
+  // Build PnL map
+  const pnlMap = {};
+  data.forEach(d => {
+    const day = new Date(d.date).getDate();
+    pnlMap[day] = { pnl: parseFloat(d.daily_pnl || 0), trades: d.trades || 0 };
+  });
+
+  const totalPnl  = data.reduce((s, d) => s + parseFloat(d.daily_pnl || 0), 0);
+  const winDays   = data.filter(d => parseFloat(d.daily_pnl) > 0).length;
+  const lossDays  = data.filter(d => parseFloat(d.daily_pnl) < 0).length;
+
+  const pnlEl = document.getElementById('cal-pnl');
+  if (pnlEl) { pnlEl.textContent = formatPnL(totalPnl); pnlEl.className = 'kpi-value ' + pnlColor(totalPnl); }
+  setText('cal-win-days',  winDays);
+  setText('cal-loss-days', lossDays);
+  setText('cal-days', `${winDays + lossDays} active trading days`);
+
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const firstDay    = new Date(calYear, calMonth, 1).getDay();
+  const today       = new Date();
+
+  let html = DAYS.map(d => `<div class="cal-hdr">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const d       = pnlMap[day];
+    const isToday = day === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+    const cls     = `cal-day ${isToday ? 'today' : ''} ${d ? (d.pnl > 0 ? 'win-day' : 'loss-day') : ''}`;
+    html += `<div class="${cls}" title="${d ? formatPnL(d.pnl) : 'No trades'}">
+      <div class="cal-dn" style="color:${isToday ? 'var(--blue2)' : ''}">${day}</div>
+      ${d ? `<div class="cal-pnl ${pnlColor(d.pnl)}">${formatPnL(d.pnl)}</div><div class="cal-tc">${d.trades} trade${d.trades !== 1 ? 's' : ''}</div>` : ''}
+    </div>`;
+  }
+
+  const calGrid = document.getElementById('cal-grid');
+  if (calGrid) calGrid.innerHTML = html;
+}
+
+// ══ ACCOUNTS ═══════════════════════════════════
+async function loadAccounts() {
+  showLoader('accounts-grid');
+  try {
+    const res  = await API.accounts.getAll();
+    allAccounts = res.accounts || [];
+    renderAccounts(allAccounts);
+  } catch(e) {
+    const el = document.getElementById('accounts-grid');
+    if (el) el.innerHTML = `<div class="tt-empty" style="grid-column:1/-1"><div class="tt-empty-icon">🏦</div><h3>No accounts connected</h3><p>Connect your first broker account to get started</p></div>`;
+  }
+}
+
+function renderAccounts(accounts) {
+  const el = document.getElementById('accounts-grid');
+  if (!el) return;
+  if (!accounts.length) {
+    el.innerHTML = `<div class="tt-empty" style="grid-column:1/-1"><div class="tt-empty-icon">🏦</div><h3>No accounts yet</h3><p>Connect a broker account to track your performance</p></div>`;
+    return;
+  }
+  const typeIcons = { MT5:'🏦', MT4:'💹', cTrader:'📊', TradeLocker:'🔐' };
+  const typeBadge = { Live:'badge-green', Demo:'badge-blue', 'Prop Firm':'badge-purple' };
+  el.innerHTML = accounts.map(a => `
+    <div class="card" style="transition:all .2s;cursor:pointer" onmouseover="this.style.borderColor='var(--border2)'" onmouseout="this.style.borderColor='var(--border)'">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:10px;background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center;font-size:20px">${typeIcons[a.platform] || '🏦'}</div>
+        <span class="badge ${typeBadge[a.account_type] || 'badge-blue'}">● ${a.account_type}</span>
+      </div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:3px">${a.platform} — ${a.name}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:14px">${a.broker} · ${a.account_number || ''}</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Balance</span><span style="font-weight:700">$${parseFloat(a.balance||0).toLocaleString()}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Equity</span><span style="font-weight:700;color:var(--green2)">$${parseFloat(a.equity||0).toLocaleString()}</span></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:6px">
+        <button class="btn btn-danger btn-sm" onclick="deleteAccount(${a.id})">Remove</button>
+      </div>
+    </div>`).join('') + `
+    <div class="card" style="border-style:dashed;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;cursor:pointer" onclick="openAddAccount()">
+      <div style="font-size:32px;opacity:.2;margin-bottom:8px">+</div>
+      <div style="font-size:13px;color:var(--text3)">Add Account</div>
+      <div style="font-size:11px;color:var(--text4);margin-top:4px">MT4/MT5/cTrader</div>
+    </div>`;
+}
+
+function openAddAccount()  { hideAlert('acct-modal-alert'); document.getElementById('add-account-modal').style.display = 'flex'; }
+function closeAddAccount() { document.getElementById('add-account-modal').style.display = 'none'; }
+
+async function saveAccount() {
+  const name    = document.getElementById('am-name').value.trim();
+  const broker  = document.getElementById('am-broker').value.trim();
+  const platform= document.getElementById('am-platform').value;
+  const type    = document.getElementById('am-type').value;
+  const number  = document.getElementById('am-number').value.trim();
+  const balance = parseFloat(document.getElementById('am-balance').value) || 0;
+  if (!name || !broker) { showAlert('Name and broker are required', 'error', 'acct-modal-alert'); return; }
+  try {
+    await API.accounts.create({ name, broker, platform, account_type: type, account_number: number, balance, equity: balance });
+    closeAddAccount();
+    showToast('Account connected! ✅', 'success');
+    await loadAccounts();
+  } catch(e) { showAlert(e.message || 'Failed to connect account', 'error', 'acct-modal-alert'); }
+}
+
+async function deleteAccount(id) {
+  if (!confirm('Remove this account?')) return;
+  try { await API.accounts.delete(id); showToast('Account removed', 'info'); await loadAccounts(); }
+  catch(e) { showToast(e.message || 'Failed', 'error'); }
+}
+
+// ══ AI INSIGHTS ════════════════════════════════
+async function loadAI() {
+  try {
+    const [scoresRes, insightsRes] = await Promise.all([API.ai.scores(), API.ai.insights()]);
+    renderAIScores(scoresRes.scores || {});
+    renderAIInsights(insightsRes.insights || []);
+    renderHoursGrid();
+  } catch(e) { console.error(e); }
+}
+
+function renderAIScores(scores) {
+  const el = document.getElementById('ai-scores-row');
+  if (!el) return;
+  const items = [
+    { label:'Overall Score',   val: scores.overall || 0,        color:'var(--blue2)',   grad:'from-blue-600 to-violet-700' },
+    { label:'Discipline',      val: scores.discipline || 0,     color:'var(--green2)',  barColor:'var(--green)' },
+    { label:'Risk Management', val: scores.riskManagement || 0, color:'var(--amber2)',  barColor:'var(--amber)' },
+    { label:'Consistency',     val: scores.consistency || 0,    color:'var(--purple2)', barColor:'var(--purple)' },
+  ];
+  el.innerHTML = items.map((item, i) => i === 0 ? `
+    <div class="ai-score-card">
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">${item.label}</div>
+      <div class="ai-score-num">${item.val}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">/100 — ${item.val >= 85 ? 'Excellent' : item.val >= 70 ? 'Very Good' : item.val >= 55 ? 'Good' : 'Needs Work'}</div>
+      <div class="tt-progress-track"><div class="tt-progress-fill" style="width:${item.val}%;background:linear-gradient(90deg,#3b82f6,#8b5cf6)"></div></div>
+    </div>` : `
+    <div class="ai-score-card">
+      <div style="font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">${item.label}</div>
+      <div style="font-size:38px;font-weight:900;color:${item.color};line-height:1;margin-bottom:4px">${item.val}</div>
+      <div class="tt-progress-track" style="margin-top:8px"><div class="tt-progress-fill" style="width:${item.val}%;background:${item.barColor}"></div></div>
+    </div>`
+  ).join('');
+}
+
+function renderAIInsights(insights) {
+  const el = document.getElementById('ai-recs-list');
+  if (!el) return;
+  if (!insights.length) {
+    el.innerHTML = `<div class="tt-empty"><div class="tt-empty-icon">✦</div><h3>No insights yet</h3><p>Click "Generate Insights" to get AI analysis</p></div>`;
+    return;
+  }
+  const styles = {
+    strength:    { color:'var(--green2)', bg:'rgba(16,185,129,.07)', border:'rgba(16,185,129,.2)',  icon:'✅' },
+    improvement: { color:'var(--amber2)', bg:'rgba(245,158,11,.07)', border:'rgba(245,158,11,.2)',  icon:'💡' },
+    warning:     { color:'var(--red2)',   bg:'rgba(239,68,68,.07)',  border:'rgba(239,68,68,.2)',   icon:'⚠️' },
+    insight:     { color:'var(--blue2)',  bg:'rgba(59,130,246,.07)', border:'rgba(59,130,246,.2)',  icon:'📊' },
+  };
+  el.innerHTML = insights.slice(0, 6).map(ins => {
+    const s = styles[ins.type] || styles.insight;
+    return `<div style="padding:12px 14px;background:${s.bg};border:1px solid ${s.border};border-radius:9px;margin-bottom:9px;cursor:pointer" onclick="showToast('${ins.title}','info')">
+      <div style="font-size:10px;font-weight:700;color:${s.color};margin-bottom:5px;letter-spacing:.04em">${s.icon} ${ins.title} <span style="opacity:.6;font-size:9px;margin-left:6px">${ins.impact?.toUpperCase()}</span></div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">${ins.message}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderHoursGrid() {
+  const el = document.getElementById('ai-hours-grid');
+  if (!el) return;
+  // Placeholder — ideally from analytics
+  const vals = [8,6,10,14,18,34,68,82,92,90,84,76,68,80,90,85,70,58,42,30,22,16,10,6];
+  el.innerHTML = Array.from({length:24}, (_,i) => `
+    <div style="aspect-ratio:1;background:rgba(59,130,246,${vals[i]/100});border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.7);cursor:default" title="${i}:00 UTC · ${vals[i]}% win rate">${i}</div>
+  `).join('');
+}
+
+async function generateAI() {
+  const btn = document.getElementById('gen-ai-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '✦ Generating...'; }
+  try {
+    const res = await API.ai.generate();
+    renderAIInsights(res.insights || []);
+    showToast('✦ AI insights generated!', 'success');
+  } catch(e) { showToast(e.message || 'Generation failed', 'error'); }
+  if (btn) { btn.disabled = false; btn.textContent = '✦ Generate Insights'; }
+}
+
+// ══ LEADERBOARD ════════════════════════════════
+async function loadLeaderboard() {
+  showLoader('lb-list');
+  try {
+    const res = await API.leaderboard.get();
+    const lb  = res.leaderboard || [];
+    const myId = Auth.getUser()?.id;
+
+    setText('lb-total', lb.length || '—');
+    const myEntry = lb.find(e => e.user_id === myId);
+    if (myEntry) {
+      setText('lb-rank',   `#${res.myRank || '—'}`);
+      setText('lb-points', myEntry.points || '—');
+    } else {
+      setText('lb-rank',   '—');
+      setText('lb-points', '0');
+    }
+    renderLeaderboard(lb, myId);
+  } catch(e) { showEmpty('lb-list', '🏆', 'No rankings yet', 'Be the first to update your stats!'); }
+}
+
+function renderLeaderboard(entries, myId) {
+  const el = document.getElementById('lb-list');
+  if (!el) return;
+  if (!entries.length) { el.innerHTML = `<div class="tt-empty"><div class="tt-empty-icon">🏆</div><h3>No rankings yet</h3><p>Update your stats to appear on the leaderboard</p></div>`; return; }
+  const medals = { 1:'🥇', 2:'🥈', 3:'🥉' };
+  const grads  = ['linear-gradient(135deg,#2563eb,#7c3aed)','linear-gradient(135deg,#10b981,#2563eb)','linear-gradient(135deg,#f59e0b,#ef4444)','linear-gradient(135deg,#8b5cf6,#ec4899)','linear-gradient(135deg,#10b981,#f59e0b)'];
+  el.innerHTML = entries.map((e, i) => {
+    const isMe = e.user_id === myId;
+    const initials = (e.name||'TT').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    return `<div class="rank-card ${isMe ? 'me' : ''}">
+      <div style="font-size:18px;width:32px;text-align:center">${medals[i+1] || `<span style="font-size:13px;color:var(--text3)">#${i+1}</span>`}</div>
+      <div style="width:36px;height:36px;border-radius:50%;background:${grads[i%grads.length]};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600">${e.name || 'Trader'}${isMe ? ' <span style="font-size:10px;color:var(--blue2)">(You)</span>' : ''}</div>
+        <div style="font-size:10px;color:var(--text3)">${e.total_trades || 0} trades · WR ${parseFloat(e.win_rate||0).toFixed(1)}%</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:14px;font-weight:700;color:var(--green2)">${parseFloat(e.roi||0) >= 0 ? '+' : ''}${parseFloat(e.roi||0).toFixed(1)}%</div>
+        <div style="font-size:10px;color:var(--text3)">ROI</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;min-width:52px">
+        <div style="font-size:12px;font-weight:700;color:var(--blue2)">${(e.points||0).toLocaleString()}</div>
+        <div style="font-size:9px;color:var(--text4)">pts</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function updateLeaderboard() {
+  try {
+    const res = await API.leaderboard.update();
+    showToast(`Stats updated! ${res.points} points 🎉`, 'success');
+    await loadLeaderboard();
+  } catch(e) { showToast(e.message || 'Update failed', 'error'); }
+}
+
+// ══ SETTINGS ═══════════════════════════════════
+async function loadSettings() {
+  try {
+    const res  = await API.auth.me();
+    const user = res.user;
+    const nameEl = document.getElementById('s-name');
+    const emailEl= document.getElementById('s-email');
+    if (nameEl)  nameEl.value  = user.name || '';
+    if (emailEl) emailEl.value = user.email || '';
+    if (user.plan) setText('s-plan-name', user.plan.charAt(0).toUpperCase() + user.plan.slice(1) + ' Plan');
+  } catch {}
+  renderNotifSettings();
+  renderSecSettings();
+}
+
+function renderNotifSettings() {
+  const el = document.getElementById('notif-settings');
+  if (!el) return;
+  const rows = [
+    ['Trade Alerts',         'Get notified when trades are added',  true ],
+    ['Daily Summary',        'End-of-day P&L summary via email',    true ],
+    ['AI Insights',          'Weekly AI coaching report',           false],
+    ['Drawdown Alerts',      'Alert when drawdown exceeds 5%',      true ],
+    ['Leaderboard Updates',  'Rank change notifications',           false],
+  ];
+  el.innerHTML = rows.map(([t,s,on]) => `
+    <div class="settings-row">
+      <div><div style="font-size:13px;font-weight:500">${t}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${s}</div></div>
+      <button class="tt-toggle ${on?'on':''}" onclick="this.classList.toggle('on');showToast('Setting updated','success')"></button>
+    </div>`).join('');
+}
+
+function renderSecSettings() {
+  const el = document.getElementById('sec-settings');
+  if (!el) return;
+  const rows = [
+    ['Two-Factor Auth', 'Extra layer of login security', false],
+    ['Session Alerts',  'Alert on new logins',           true ],
+    ['API Access',      'Generate API keys',             false],
+  ];
+  el.innerHTML = rows.map(([t,s,on]) => `
+    <div class="settings-row">
+      <div><div style="font-size:13px;font-weight:500">${t}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">${s}</div></div>
+      <button class="tt-toggle ${on?'on':''}" onclick="this.classList.toggle('on');showToast('Security setting updated','success')"></button>
+    </div>`).join('');
+}
+
+async function saveProfile() {
+  const name = document.getElementById('s-name').value.trim();
+  if (!name) return;
+  try {
+    await API.auth.update({ name });
+    const user = Auth.getUser(); user.name = name; Auth.login(Auth.getToken(), user);
+    fillUserInfo();
+    document.getElementById('profile-ok').style.display = 'flex';
+    showToast('Profile saved ✅', 'success');
+    setTimeout(() => { const el = document.getElementById('profile-ok'); if(el) el.style.display='none'; }, 3000);
+  } catch(e) { showToast(e.message || 'Failed to save', 'error'); }
+}
+
+// ══ CHARTS ═════════════════════════════════════
+const cOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#4d6a8a', font:{ size:10 } } },
+    y: { grid: { color:'rgba(255,255,255,0.04)' }, ticks: { color:'#4d6a8a', font:{ size:10 } } }
+  }
+};
+
+function drawEquityChart(canvasId, data) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+  if (Chart.getChart(el)) Chart.getChart(el).destroy();
+  new Chart(el, {
+    type: 'line',
+    data: {
+      labels: data.map(d => formatDate(d.date)),
+      datasets: [{
+        data: data.map(d => d.equity),
+        borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.07)',
+        fill: true, tension: 0.45, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4
+      }]
+    },
+    options: { ...cOpts, scales: {
+      x: { ...cOpts.scales.x, ticks: { ...cOpts.scales.x.ticks, maxTicksLimit: 6 } },
+      y: { ...cOpts.scales.y, ticks: { ...cOpts.scales.y.ticks, callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(1)+'k' : v) } }
+    }}
+  });
+}
+
+function drawMonthlyChart(canvasId, data) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+  if (Chart.getChart(el)) Chart.getChart(el).destroy();
+  new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.month),
+      datasets: [{
+        data: data.map(d => d.total_pnl),
+        backgroundColor: data.map(d => parseFloat(d.total_pnl) >= 0 ? 'rgba(16,185,129,0.65)' : 'rgba(239,68,68,0.65)'),
+        borderRadius: 4, borderSkipped: false,
+      }]
+    },
+    options: { ...cOpts, scales: {
+      x: { ...cOpts.scales.x },
+      y: { ...cOpts.scales.y, ticks: { ...cOpts.scales.y.ticks, callback: v => '$' + v } }
+    }}
+  });
+}
+
+function drawWLChart(canvasId, wins, losses) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+  if (Chart.getChart(el)) Chart.getChart(el).destroy();
+  new Chart(el, {
+    type: 'doughnut',
+    data: {
+      labels: [`Win ${wins}`, `Loss ${losses}`],
+      datasets: [{
+        data: [wins || 1, losses || 1],
+        backgroundColor: ['rgba(16,185,129,0.8)', 'rgba(239,68,68,0.8)'],
+        borderColor: ['#10b981', '#ef4444'], borderWidth: 1.5
+      }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'72%', plugins:{ legend:{ labels:{ color:'#8da4c4', font:{ size:11 } } } } }
+  });
+}
+
+function drawAssetChart(canvasId, data) {
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+  if (Chart.getChart(el)) Chart.getChart(el).destroy();
+  new Chart(el, {
+    type: 'bar',
+    data: {
+      labels: data.slice(0,7).map(d => d.pair),
+      datasets: [{
+        data: data.slice(0,7).map(d => d.total_pnl),
+        backgroundColor: data.slice(0,7).map(d => parseFloat(d.total_pnl) >= 0 ? 'rgba(59,130,246,0.65)' : 'rgba(239,68,68,0.65)'),
+        borderRadius: 4, borderSkipped: false,
+      }]
+    },
+    options: { ...cOpts, indexAxis: 'y', scales: {
+      x: { ...cOpts.scales.x, ticks: { ...cOpts.scales.x.ticks, callback: v => '$' + v } },
+      y: { grid: { display:false }, ticks: { color:'#8da4c4', font:{ size:11 } } }
+    }}
+  });
+}
+
+// ══ FAQ ════════════════════════════════════════
+function loadTradingViewChart(pair) {
+
+  const symbols = {
+    EURUSD: "FX:EURUSD",
+    GBPUSD: "FX:GBPUSD",
+    USDJPY: "FX:USDJPY",
+    XAUUSD: "OANDA:XAUUSD",
+    BTCUSD: "BINANCE:BTCUSDT",
+    ETHUSD: "BINANCE:ETHUSDT",
+    AUDUSD: "FX:AUDUSD",
+    NZDUSD: "FX:NZDUSD",
+    USDCAD: "FX:USDCAD",
+    GBPJPY: "FX:GBPJPY"
+  };
+
+  document.getElementById('tv-chart-container').innerHTML = '';
+
+  new TradingView.widget({
+    autosize: true,
+    symbol: symbols[pair] || "FX:EURUSD",
+    interval: "15",
+    timezone: "Asia/Kolkata",
+    theme: "dark",
+    style: "1",
+    locale: "en",
+    toolbar_bg: "#0f172a",
+    enable_publishing: false,
+    allow_symbol_change: true,
+    hide_top_toolbar: false,
+    save_image: true,
+    container_id: "tv-chart-container"
+  });
+}
+     
+     function buildFAQ() {
+  const el = document.getElementById('faq-list');
+  if (!el) return;
+  const faqs = [
+    ['How does TrackingTrade work?', 'You log your trades manually or connect a broker account. TrackingTrade automatically calculates P&L, win rate, RR ratio and generates analytics and AI coaching insights.'],
+    ['Is it free?', 'Yes! The Starter plan is completely free forever. You can upgrade to Pro or Elite for advanced features like AI coaching and unlimited trades.'],
+    ['Can I connect MT4/MT5?', 'Yes — you can connect MetaTrader 4, MT5, cTrader and TradeLocker accounts from your Accounts dashboard.'],
+    ['How does the AI coach work?', 'Our AI analyzes your closed trades and generates personalized recommendations — identifying your strengths, weaknesses and trading patterns.'],
+    ['Is my data secure?', 'Yes. All data is encrypted in transit and at rest. We never share your trading data with third parties.'],
+  ];
+  el.innerHTML = faqs.map(([q, a]) => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:9px;margin-bottom:8px;overflow:hidden">
+      <div style="padding:14px 16px;font-size:14px;font-weight:500;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('.faq-arr').style.transform=this.nextElementSibling.style.display==='block'?'rotate(180deg)':'rotate(0deg)'">
+        ${q}<span class="faq-arr" style="transition:transform .2s;color:var(--text3)">▼</span>
+      </div>
+      <div style="display:none;padding:0 16px 14px;font-size:13px;color:var(--text3);line-height:1.65">${a}</div>
+    </div>`).join('');
+}
+</script>
+
+<script src="https://s3.tradingview.com/tv.js"></script>
+
+</body>
+</html>
