@@ -58,11 +58,15 @@ const register = async (req, res) => {
     }
 
     const hashed = await bcrypt.hash(password, 12);
+    const verificationToken =
+  crypto.randomBytes(32).toString('hex');
 
-    const [result] = await db.query(
-      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-      [name, email, hashed]
-    );
+  const [result] = await db.query(
+  `INSERT INTO users
+   (name, email, password, verification_token)
+   VALUES (?, ?, ?, ?)`,
+  [name, email, hashed, verificationToken]
+);
 
     const token = generateToken(
       result.insertId,
