@@ -516,6 +516,50 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// ============================================
+// VERIFY EMAIL
+// ============================================
+const verifyEmail = async (req, res) => {
+  try {
+
+    const { token } = req.params;
+
+    const [users] = await db.query(
+      `SELECT id
+       FROM users
+       WHERE verification_token = ?`,
+      [token]
+    );
+
+    if (!users.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification token'
+      });
+    }
+
+    await db.query(
+      `UPDATE users
+       SET is_verified = TRUE,
+           verification_token = NULL
+       WHERE id = ?`,
+      [users[0].id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Email verified successfully!'
+    });
+
+  } catch (err) {
+    console.error('Verify Email Error:', err);
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
 
 module.exports = {
   register,
@@ -524,5 +568,6 @@ module.exports = {
   updateProfile,
   changePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  verifyEmail
 };
