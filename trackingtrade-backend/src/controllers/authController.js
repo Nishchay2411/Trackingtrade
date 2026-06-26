@@ -70,33 +70,33 @@ const register = async (req, res) => {
 
 
 
-    const verifyLink =
-`${process.env.FRONTEND_URL}/verify-email.html?token=${verificationToken}`;
+//     const verifyLink =
+// `${process.env.FRONTEND_URL}/verify-email.html?token=${verificationToken}`;
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   }
+// });
 
-await transporter.sendMail({
-  from: process.env.EMAIL_USER,
-  to: email,
-  subject: 'Verify your TrackingTrade account',
-  html: `
-    <h2>Welcome to TrackingTrade 🚀</h2>
+// await transporter.sendMail({
+//   from: process.env.EMAIL_USER,
+//   to: email,
+//   subject: 'Verify your TrackingTrade account',
+//   html: `
+//     <h2>Welcome to TrackingTrade 🚀</h2>
 
-    <p>Please verify your email by clicking below:</p>
+//     <p>Please verify your email by clicking below:</p>
 
-    <a href="${verifyLink}">
-      Verify Email
-    </a>
+//     <a href="${verifyLink}">
+//       Verify Email
+//     </a>
 
-    <p>If you didn't create this account, ignore this email.</p>
-  `
-});
+//     <p>If you didn't create this account, ignore this email.</p>
+//   `
+// });
     const token = generateToken(
       result.insertId,
       email,
