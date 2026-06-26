@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Email - TrackingTrade</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #0f172a;
+            color: white;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            width: 400px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Email Verification</h1>
+
+        <p>Verifying your account...</p>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get('token');
+
+        const API_URL =
+          'https://YOUR_BACKEND_URL/api/auth';
+
+        async function verifyEmail() {
+
+            if (!token) {
+                document.getElementById('message')
+                    .innerHTML =
+                    '❌ Invalid verification link';
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    `${API_URL}/verify-email/${token}`
+                );
+
+                const data = await response.json();
+
+                if (data.success) {
+
+                    document.getElementById('message')
+                        .innerHTML = `
+                        ✅ Email verified successfully!
+                        <br><br>
+                        <a href="login.html">
+                            Go to Login
+                        </a>
+                    `;
+
+                } else {
+
+                    document.getElementById('message')
+                        .innerHTML =
+                        `❌ ${data.message}`;
+                }
+
+            } catch (err) {
+
+                document.getElementById('message')
+                    .innerHTML =
+                    '❌ Verification failed';
+            }
+        }
+
+        verifyEmail();
+    </script>
+
+</body>
+</html>
