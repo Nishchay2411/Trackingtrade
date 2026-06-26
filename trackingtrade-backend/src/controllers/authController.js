@@ -68,6 +68,35 @@ const register = async (req, res) => {
   [name, email, hashed, verificationToken]
 );
 
+
+
+    const verifyLink =
+`${process.env.FRONTEND_URL}/verify-email.html?token=${verificationToken}`;
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+await transporter.sendMail({
+  from: process.env.EMAIL_USER,
+  to: email,
+  subject: 'Verify your TrackingTrade account',
+  html: `
+    <h2>Welcome to TrackingTrade 🚀</h2>
+
+    <p>Please verify your email by clicking below:</p>
+
+    <a href="${verifyLink}">
+      Verify Email
+    </a>
+
+    <p>If you didn't create this account, ignore this email.</p>
+  `
+});
     const token = generateToken(
       result.insertId,
       email,
@@ -124,6 +153,14 @@ const login = async (req, res) => {
     }
 
     const user = users[0];
+    
+    if (!user.is_verified) {
+  return res.status(401).json({
+    success: false,
+    message:
+      'Please verify your email before logging in.'
+  });
+}
 
     // Check if account is locked
     if (user.lock_until && user.lock_until > Date.now()) {
