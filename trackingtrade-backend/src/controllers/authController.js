@@ -417,16 +417,19 @@ const forgotPassword = async (req, res) => {
     const resetLink =
       `${process.env.FRONTEND_URL}/reset-password.html?token=${token}`;
 
-   const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
+ const transporter = nodemailer.createTransport({
+  host: 'smtp-relay.brevo.com',
+  port: 587,
   secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
-  }
+  },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000
 });
-
     await transporter.sendMail({
     from: process.env.EMAIL_FROM,
       to: email,
