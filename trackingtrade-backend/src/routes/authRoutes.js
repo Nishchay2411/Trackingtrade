@@ -7,7 +7,8 @@ const {
   updateProfile,
   changePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  verifyEmail
 } = require('../controllers/authController');
 
 const { protect } = require('../middleware/auth');
@@ -48,6 +49,12 @@ router.post(
   '/reset-password',
   forgotPasswordLimiter,
   resetPassword
+);
+
+// Verify Email
+router.get(
+  '/verify-email/:token',
+  verifyEmail
 );
 
 // ============================================
