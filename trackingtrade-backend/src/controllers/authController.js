@@ -72,6 +72,9 @@ const register = async (req, res) => {
 
 const verifyLink =
 `${process.env.FRONTEND_URL}/verify-email.html?token=${verificationToken}`;
+    
+    console.log('SMTP_USER:', process.env.SMTP_USER);
+console.log('SMTP_PASS:', process.env.SMTP_PASS ? 'SET' : 'NOT SET');
 
 const transporter = nodemailer.createTransport({
   host: 'smtp-relay.brevo.com',
