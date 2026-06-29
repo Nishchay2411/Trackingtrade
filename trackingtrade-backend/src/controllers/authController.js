@@ -35,7 +35,9 @@ const createTransporter = () =>
 // ============================================
 const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+   const name = req.body.name?.trim();
+const email = req.body.email?.toLowerCase().trim();
+const password = req.body.password;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -113,7 +115,8 @@ const register = async (req, res) => {
 // ============================================
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+   const email = req.body.email?.toLowerCase().trim();
+const password = req.body.password;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -162,10 +165,14 @@ const login = async (req, res) => {
 
       if (attempts >= 5) {
         lockUntil = Date.now() + (15 * 60 * 1000);
-        await db.query(
-          `UPDATE users SET login_attempts = ?, lock_until = ? WHERE id = ?`,
-          [attempts, lockUntil, user.id]
-        );
+       await db.query(
+  `UPDATE users
+   SET login_attempts = 0,
+       lock_until = NULL,
+       last_login = NOW()
+   WHERE id = ?`,
+  [user.id]
+);
         return res.status(423).json({
           success: false,
           message: 'Account locked for 15 minutes due to too many failed attempts.'
@@ -238,18 +245,37 @@ const getMe = async (req, res) => {
 // ============================================
 const updateProfile = async (req, res) => {
   try {
-    const { name, timezone, currency } = req.body;
+
+    const name = req.body.name?.trim();
+    const timezone = req.body.timezone?.trim();
+    const currency = req.body.currency?.trim();
+
+    if (!name || !timezone || !currency) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
 
     await db.query(
-      `UPDATE users SET name=?, timezone=?, currency=? WHERE id=?`,
+      `UPDATE users
+       SET name = ?, timezone = ?, currency = ?
+       WHERE id = ?`,
       [name, timezone, currency, req.user.id]
     );
 
-    res.json({ success: true, message: 'Profile updated successfully!' });
+    res.json({
+      success: true,
+      message: 'Profile updated successfully!'
+    });
 
   } catch (err) {
     console.error('Update Profile Error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };
 
@@ -259,6 +285,12 @@ const updateProfile = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+  return res.status(400).json({
+    success: false,
+    message: 'Current and new password are required'
+  });
+}
 
     if (!passwordRegex.test(newPassword)) {
       return res.status(400).json({
@@ -300,7 +332,14 @@ const changePassword = async (req, res) => {
 // ============================================
 const forgotPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+   const email = req.body.email?.toLowerCase().trim();
+
+if (!email) {
+  return res.status(400).json({
+    success: false,
+    message: 'Email is required'
+  });
+}
 
     const [users] = await db.query(
       'SELECT id, email FROM users WHERE email=?',
@@ -370,9 +409,12 @@ const resetPassword = async (req, res) => {
       [token]
     );
 
-    if (!users.length) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
-    }
+ if (!users.length) {
+  return res.status(400).json({
+    success: false,
+    message: 'Invalid or expired verification link'
+  });
+}
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -400,9 +442,11 @@ const verifyEmail = async (req, res) => {
     const { token } = req.params;
 
     const [users] = await db.query(
-      `SELECT id FROM users WHERE verification_token = ?`,
-      [token]
-    );
+  `SELECT id, is_verified
+   FROM users
+   WHERE verification_token = ?`,
+  [token]
+);
 
     if (!users.length) {
       return res.status(400).json({ success: false, message: 'Invalid verification token' });
