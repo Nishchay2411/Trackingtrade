@@ -459,4 +459,41 @@ const updateTrade = async (req, res) => {
   }
 };
 
+
+// DELETE /api/trades/:id
+const deleteTrade = async (req, res) => {
+  try {
+
+    const [existing] = await db.query(
+      'SELECT id FROM trades WHERE id = ? AND user_id = ?',
+      [req.params.id, req.user.id]
+    );
+
+    if (!existing.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Trade not found'
+      });
+    }
+
+    await db.query(
+      'DELETE FROM trades WHERE id = ?',
+      [req.params.id]
+    );
+
+    res.json({
+      success: true,
+      message: 'Trade deleted successfully!'
+    });
+
+  } catch (err) {
+    console.error('Delete Trade Error:', err);
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
 module.exports = { getAllTrades, getTrade, createTrade, updateTrade, deleteTrade };
