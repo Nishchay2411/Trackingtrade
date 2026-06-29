@@ -42,8 +42,24 @@ const calcDuration = (open_time, close_time) => {
 };
 
 // FIX Bug 3: Synced to match DB ENUM exactly
-const validTypes    = ['BUY', 'SELL'];
-const validSessions = ['Asian', 'London', 'New York', 'London/NY', 'Asian/London'];
+const validTypes = ['BUY', 'SELL'];
+
+const validStrategies = [
+  'Trend Follow',
+  'Breakout',
+  'Reversal',
+  'Scalp',
+  'Swing',
+  'Other'
+];
+
+const validSessions = [
+  'Asian',
+  'London',
+  'New York',
+  'London/NY',
+  'Asian/London'
+];
 
 // GET /api/trades  — with filters
 const getAllTrades = async (req, res) => {
@@ -89,12 +105,22 @@ const getTrade = async (req, res) => {
 const createTrade = async (req, res) => {
   try {
     const {
-      account_id, pair, type, lots, entry_price, exit_price,
-      stop_loss, take_profit, open_time, close_time,
-      strategy, session, notes
+      account_id,
+      pair,
+      type,
+      lots,
+      entry_price,
+      exit_price,
+      stop_loss,
+      take_profit,
+      open_time,
+      close_time,
+      strategy,
+      session,
+      notes
     } = req.body;
 
-    // Required field validation
+    // Validation
     if (!pair || !type || !lots || !entry_price || !open_time) {
       return res.status(400).json({
         success: false,
@@ -102,21 +128,39 @@ const createTrade = async (req, res) => {
       });
     }
 
-    // FIX Bug 3: Use synced validSessions list
     if (!validTypes.includes(type)) {
-      return res.status(400).json({ success: false, message: 'Invalid trade type' });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid trade type'
+      });
+    }
+
+    if (strategy && !validStrategies.includes(strategy)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid strategy'
+      });
     }
 
     if (session && !validSessions.includes(session)) {
-      return res.status(400).json({ success: false, message: 'Invalid session' });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid session'
+      });
     }
 
-    if (lots <= 0 || lots > 1000) {
-      return res.status(400).json({ success: false, message: 'Invalid lot size' });
+    if (Number(lots) <= 0 || Number(lots) > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid lot size'
+      });
     }
 
-    if (entry_price <= 0) {
-      return res.status(400).json({ success: false, message: 'Entry price must be greater than zero' });
+    if (Number(entry_price) <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Entry price must be greater than zero'
+      });
     }
 
     // Account ownership check
@@ -125,28 +169,91 @@ const createTrade = async (req, res) => {
         'SELECT id FROM trading_accounts WHERE id=? AND user_id=?',
         [account_id, req.user.id]
       );
+
       if (!accounts.length) {
-        return res.status(403).json({ success: false, message: 'Invalid trading account' });
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid trading account'
+        });
       }
     }
 
-    const status   = exit_price ? 'closed' : 'open';
-    const pnl      = exit_price ? calcPnL(pair, type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(lots)) : 0;
-    const rr_ratio = exit_price && stop_loss ? calcRR(type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(stop_loss)) : null;
+    const sanitizedNotes =
+      notes?.trim().substring(0, 5000) || '';
 
-    const { duration, error } = calcDuration(open_time, close_time);
-    if (error) return res.status(400).json({ success: false, message: error });
+    const status = exit_price ? 'closed' : 'open';
+
+    const pnl = exit_price
+      ? calcPnL(
+          pair,
+          type,
+          Number(entry_price),
+          Number(exit_price),
+          Number(lots)
+        )
+      : 0;
+
+    const rr_ratio =
+      exit_price && stop_loss
+        ? calcRR(
+            type,
+            Number(entry_price),
+            Number(exit_price),
+            Number(stop_loss)
+          )
+        : null;
+
+    const { duration, error } =
+      calcDuration(open_time, close_time);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error
+      });
+    }
 
     const [result] = await db.query(
-      `INSERT INTO trades (user_id, account_id, pair, type, lots, entry_price, exit_price,
-       stop_loss, take_profit, pnl, rr_ratio, duration, open_time, close_time,
-       status, strategy, session, notes)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      `INSERT INTO trades (
+        user_id,
+        account_id,
+        pair,
+        type,
+        lots,
+        entry_price,
+        exit_price,
+        stop_loss,
+        take_profit,
+        pnl,
+        rr_ratio,
+        duration,
+        open_time,
+        close_time,
+        status,
+        strategy,
+        session,
+        notes
+      )
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
-        req.user.id, account_id || null, pair, type, lots, entry_price,
-        exit_price || null, stop_loss || null, take_profit || null,
-        pnl, rr_ratio, duration, open_time, close_time || null,
-        status, strategy || 'Other', session || 'London', notes || ''
+        req.user.id,
+        account_id || null,
+        pair,
+        type,
+        lots,
+        entry_price,
+        exit_price || null,
+        stop_loss || null,
+        take_profit || null,
+        pnl,
+        rr_ratio,
+        duration,
+        open_time,
+        close_time || null,
+        status,
+        strategy || 'Other',
+        session || 'London',
+        sanitizedNotes
       ]
     );
 
@@ -158,81 +265,197 @@ const createTrade = async (req, res) => {
       rr_ratio,
       status
     });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };
+
 
 // PUT /api/trades/:id
 const updateTrade = async (req, res) => {
   try {
+
     const [existing] = await db.query(
       'SELECT id FROM trades WHERE id=? AND user_id=?',
       [req.params.id, req.user.id]
     );
-    if (!existing.length) return res.status(404).json({ success: false, message: 'Trade not found' });
 
-    const {
-      account_id, pair, type, lots, entry_price, exit_price,
-      stop_loss, take_profit, open_time, close_time,
-      strategy, session, notes
-    } = req.body;
-
-    // FIX Bug 3: Validate session on update too
-    if (session && !validSessions.includes(session)) {
-      return res.status(400).json({ success: false, message: 'Invalid session' });
+    if (!existing.length) {
+      return res.status(404).json({
+        success: false,
+        message: 'Trade not found'
+      });
     }
 
-    // FIX Bug 10: Account ownership check in updateTrade (was missing before)
+    const {
+      account_id,
+      pair,
+      type,
+      lots,
+      entry_price,
+      exit_price,
+      stop_loss,
+      take_profit,
+      open_time,
+      close_time,
+      strategy,
+      session,
+      notes
+    } = req.body;
+
+    if (!pair || !type || !lots || !entry_price || !open_time) {
+      return res.status(400).json({
+        success: false,
+        message: 'Pair, type, lots, entry price and open time are required'
+      });
+    }
+
+    if (!validTypes.includes(type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid trade type'
+      });
+    }
+
+    if (strategy && !validStrategies.includes(strategy)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid strategy'
+      });
+    }
+
+    if (session && !validSessions.includes(session)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid session'
+      });
+    }
+
+    if (Number(lots) <= 0 || Number(lots) > 1000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid lot size'
+      });
+    }
+
+    if (Number(entry_price) <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Entry price must be greater than zero'
+      });
+    }
+
     if (account_id) {
       const [accounts] = await db.query(
         'SELECT id FROM trading_accounts WHERE id=? AND user_id=?',
         [account_id, req.user.id]
       );
+
       if (!accounts.length) {
-        return res.status(403).json({ success: false, message: 'Invalid trading account' });
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid trading account'
+        });
       }
     }
 
-    const pnl      = exit_price ? calcPnL(pair, type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(lots)) : 0;
-    const rr_ratio = exit_price && stop_loss ? calcRR(type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(stop_loss)) : null;
-    const status   = exit_price ? 'closed' : 'open';
+    const sanitizedNotes =
+      notes?.trim().substring(0, 5000) || '';
 
-    const { duration, error } = calcDuration(open_time, close_time);
-    if (error) return res.status(400).json({ success: false, message: error });
+    const pnl = exit_price
+      ? calcPnL(
+          pair,
+          type,
+          Number(entry_price),
+          Number(exit_price),
+          Number(lots)
+        )
+      : 0;
+
+    const rr_ratio =
+      exit_price && stop_loss
+        ? calcRR(
+            type,
+            Number(entry_price),
+            Number(exit_price),
+            Number(stop_loss)
+          )
+        : null;
+
+    const status = exit_price ? 'closed' : 'open';
+
+    const { duration, error } =
+      calcDuration(open_time, close_time);
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error
+      });
+    }
 
     await db.query(
-      `UPDATE trades SET pair=?, type=?, lots=?, entry_price=?, exit_price=?, stop_loss=?,
-       take_profit=?, pnl=?, rr_ratio=?, duration=?, open_time=?, close_time=?,
-       status=?, strategy=?, session=?, notes=?, account_id=? WHERE id=?`,
+      `UPDATE trades
+       SET pair=?,
+           type=?,
+           lots=?,
+           entry_price=?,
+           exit_price=?,
+           stop_loss=?,
+           take_profit=?,
+           pnl=?,
+           rr_ratio=?,
+           duration=?,
+           open_time=?,
+           close_time=?,
+           status=?,
+           strategy=?,
+           session=?,
+           notes=?,
+           account_id=?
+       WHERE id=?`,
       [
-        pair, type, lots, entry_price, exit_price || null, stop_loss || null,
-        take_profit || null, pnl, rr_ratio, duration, open_time, close_time || null,
-        status, strategy, session, notes, account_id || null, req.params.id
+        pair,
+        type,
+        lots,
+        entry_price,
+        exit_price || null,
+        stop_loss || null,
+        take_profit || null,
+        pnl,
+        rr_ratio,
+        duration,
+        open_time,
+        close_time || null,
+        status,
+        strategy || 'Other',
+        session || 'London',
+        sanitizedNotes,
+        account_id || null,
+        req.params.id
       ]
     );
 
-    res.json({ success: true, message: 'Trade updated!', pnl, status });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
+    res.json({
+      success: true,
+      message: 'Trade updated!',
+      pnl,
+      status
+    });
 
-// DELETE /api/trades/:id
-const deleteTrade = async (req, res) => {
-  try {
-    const [existing] = await db.query(
-      'SELECT id FROM trades WHERE id=? AND user_id=?',
-      [req.params.id, req.user.id]
-    );
-    if (!existing.length) return res.status(404).json({ success: false, message: 'Trade not found' });
-    await db.query('DELETE FROM trades WHERE id=?', [req.params.id]);
-    res.json({ success: true, message: 'Trade deleted!' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
   }
 };
 
