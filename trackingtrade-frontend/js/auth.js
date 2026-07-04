@@ -62,83 +62,10 @@ const Auth = {
     return response;
   }
 };
-// ============================================
-// FORGOT PASSWORD
-// ============================================
-
-async function doForgot() {
-  const email = document.getElementById('forgot-email').value.trim();
-
-  if (!email) {
-    return alert('Please enter your email');
-  }
-
-  try {
-    const response = await fetch(
-      `${CONFIG.API_BASE_URL}/auth/forgot-password`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email })
-      }
-    );
-
-    const data = await response.json();
-
-    alert(data.message);
-
-    if (data.success) {
-      showPage('login');
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert('Something went wrong');
-  }
-}
-
-// ============================================
-// RESET PASSWORD
-// ============================================
-
-async function doResetPassword() {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get('token');
-
-  const password =
-    document.getElementById('reset-password').value;
-
-  if (!password) {
-    return alert('Please enter new password');
-  }
-
-  try {
-    const response = await fetch(
-      `${CONFIG.API_BASE_URL}/auth/reset-password`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          token,
-          password
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    alert(data.message);
-
-    if (data.success) {
-      window.location.href = 'index.html';
-    }
-
-  } catch (err) {
-    console.error(err);
-    alert('Something went wrong');
-  }
-}
+// NOTE: Forgot/reset password logic lives in index.html (forgotPassword())
+// and reset-password.html (doReset()) respectively, next to the markup
+// they operate on. The duplicate doForgot()/doResetPassword() that used to
+// live here were dead code — never called from anywhere — and one of them
+// was silently overriding a same-named (also broken) function in
+// index.html because of script load order. Removed to avoid this trap
+// happening again.

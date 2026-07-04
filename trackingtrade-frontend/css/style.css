@@ -446,33 +446,6 @@ input, select, textarea { font-family: var(--font); }
 .role-opt:hover { border-color: var(--border2); }
 .role-opt.selected { border-color: var(--blue); background: rgba(59,130,246,0.08); }
 
-
-.password-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.password-wrapper input {
-  flex: 1;
-}
-
-.toggle-password {
-  border: none;
-  background: rgba(255,255,255,0.08);
-  padding: 12px 15px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 18px;
-  transition: 0.3s;
-}
-
-.toggle-password:hover {
-  transform: scale(1.05);
-}
-
-
-
 /* ══ LANDING ════════════════════════════════════ */
 .landing-wrap { min-height: 100vh; overflow-y: auto; background: var(--bg); }
 .landing-nav {

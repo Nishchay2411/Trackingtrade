@@ -222,6 +222,7 @@
       </div>
 
       <button class="btn btn-primary btn-full"
+              id="forgot-btn"
               onclick="forgotPassword()">
         Send Reset Link
       </button>
@@ -786,41 +787,48 @@ async function doLogin() {
   try {
     const res = await API.auth.login({ email, password: pass });
 
-    console.log("FULL RESPONSE:", res);
-    console.log("TOKEN:", res.token);
-    console.log("USER:", res.user);
-
     Auth.login(res.token, res.user);
 
-    console.log("1");
-
     showPage('app');
-    console.log("2");
-
     await initApp();
-    console.log("3");
 
     setTimeout(() => {
-      console.log("4");
-
       loadDashboard();
-
-      console.log("5");
-
       window.dispatchEvent(new Event('resize'));
     }, 500);
 
   } catch (e) {
-    console.error("LOGIN ERROR:", e);
+    const msg = e.message || 'Login failed';
 
-    showAlert(
-      e.message || 'Login failed',
-      'error',
-      'login-alert'
-    );
+    // FIX (Item 5 support): surface a working "Resend verification email"
+    // action right where the error appears, instead of leaving the user
+    // stuck with no path forward.
+    if (/verify your email/i.test(msg)) {
+      const alertEl = document.getElementById('login-alert');
+      showAlert(msg, 'error', 'login-alert');
+      if (alertEl) {
+        alertEl.innerHTML += ` <button class="lnk" style="text-decoration:underline" onclick="resendVerificationEmail()">Resend verification email</button>`;
+      }
+    } else {
+      showAlert(msg, 'error', 'login-alert');
+    }
 
     btn.textContent = 'Sign In';
     btn.disabled = false;
+  }
+}
+
+async function resendVerificationEmail() {
+  // Read straight from the input rather than interpolating the address
+  // into the button's onclick string above — HTML-escaping a value
+  // doesn't make it safe inside an inline JS attribute, since the
+  // browser HTML-decodes the attribute before parsing it as JS.
+  const email = document.getElementById('login-email').value.trim();
+  try {
+    const res = await API.auth.resendVerification({ email });
+    showAlert(res.message || 'If that account exists, a new link has been sent.', 'success', 'login-alert');
+  } catch (e) {
+    showAlert(e.message || 'Something went wrong. Please try again.', 'error', 'login-alert');
   }
 }
 
@@ -836,8 +844,11 @@ async function doRegister() {
     return;
   }
 
-  if (pass.length < 6) {
-    showAlert('Password must be at least 6 characters', 'error', 'reg-alert');
+  // FIX: match backend's password policy (8+ chars, upper, lower, number, symbol)
+  // so users don't pass this check and then get a confusing rejection from the API.
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!passwordRegex.test(pass)) {
+    showAlert('Password must be 8+ characters with uppercase, lowercase, number and special character (@$!%*?&)', 'error', 'reg-alert');
     return;
   }
 
@@ -845,21 +856,32 @@ async function doRegister() {
   btn.disabled = true;
 
   try {
-    const res = await API.auth.register({
-      name,
-      email,
-      password: pass
-    });
+    // FIX (Critical): register does NOT return a token/user — the backend
+    // requires email verification before login. The old code called
+    // Auth.login(res.token, res.user) with both undefined, storing the
+    // literal string "undefined" as the JWT and dropping the user into
+    // the dashboard while unauthenticated, where every API call then
+    // failed with 401. Instead, tell the user to verify their email.
+    await API.auth.register({ name, email, password: pass });
 
-    Auth.login(res.token, res.user);
+    showAlert(
+      '✅ Account created! Check your email to verify your account, then log in.',
+      'success',
+      'reg-alert'
+    );
 
-    showPage('app');
-    await initApp();
+    document.getElementById('reg-name').value = '';
+    document.getElementById('reg-email').value = '';
+    document.getElementById('reg-pass').value = '';
 
     setTimeout(() => {
-      loadDashboard();
-      window.dispatchEvent(new Event('resize'));
-    }, 500);
+      showPage('login');
+      const loginEmailEl = document.getElementById('login-email');
+      if (loginEmailEl) loginEmailEl.value = email;
+    }, 2000);
+
+    btn.textContent = 'Create Account';
+    btn.disabled = false;
 
   } catch (e) {
     showAlert(
@@ -873,11 +895,37 @@ async function doRegister() {
   }
 }
 
-async function doForgot() {
+// FIX (Critical): the "Forgot Password" button's onclick calls
+// forgotPassword(), but that function did not exist anywhere in the app
+// (only a differently-named, non-functional stub `doForgot()` existed here,
+// which never actually called the API — and an unrelated real
+// implementation sat unused in auth.js because this file's script tag
+// loads after it and any same-named function here would've overridden it).
+// This is the real, wired-up implementation.
+async function forgotPassword() {
   const email = document.getElementById('forgot-email').value.trim();
-  if (!email) return;
-  showToast('📧 Reset email sent!', 'success');
-  setTimeout(() => showPage('login'), 1500);
+  const btn   = document.getElementById('forgot-btn');
+
+  hideAlert('forgot-alert');
+
+  if (!email) {
+    showAlert('Please enter your email', 'error', 'forgot-alert');
+    return;
+  }
+
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+
+  try {
+    const res = await API.auth.forgotPassword({ email });
+    showAlert(res.message || 'If an account exists, a reset link has been sent.', 'success', 'forgot-alert');
+    setTimeout(() => showPage('login'), 2000);
+  } catch (e) {
+    showAlert(e.message || 'Something went wrong. Please try again.', 'error', 'forgot-alert');
+  } finally {
+    btn.textContent = 'Send Reset Link';
+    btn.disabled = false;
+  }
 }
 
 // ══ APP INIT ════════════════════════════════════
@@ -1058,7 +1106,7 @@ function renderRecentTrades(trades) {
   }
   el.innerHTML = `<div class="tt-table-wrap"><table class="tt-table"><thead><tr><th>Pair</th><th>Type</th><th>Entry</th><th>Exit</th><th>P&L</th><th>RR</th><th>Status</th><th>Date</th></tr></thead><tbody>` +
     trades.map(t => `<tr onclick="openDrawer(${t.id})">
-      <td class="font-bold text-blue">${t.pair}</td>
+      <td class="font-bold text-blue">${escapeHtml(t.pair)}</td>
       <td>${tradeBadge(t.type)}</td>
       <td class="font-mono" style="font-size:12px">${t.entry_price}</td>
       <td class="font-mono" style="font-size:12px">${t.exit_price || '—'}</td>
@@ -1078,14 +1126,14 @@ function renderTradesTable(trades) {
   }
   tbody.innerHTML = trades.map(t => `<tr onclick="openDrawer(${t.id})">
     <td style="color:var(--text3);font-size:11px">#${t.id}</td>
-    <td class="font-bold text-blue">${t.pair}</td>
+    <td class="font-bold text-blue">${escapeHtml(t.pair)}</td>
     <td>${tradeBadge(t.type)}</td>
     <td class="font-mono" style="font-size:12px">${t.lots}</td>
     <td class="font-mono" style="font-size:12px">${t.entry_price}</td>
     <td class="font-mono" style="font-size:12px">${t.exit_price || '—'}</td>
     <td class="font-bold ${pnlColor(t.pnl)}">${formatPnL(parseFloat(t.pnl || 0))}</td>
-    <td>${t.rr_ratio ? `<span class="badge badge-blue">${t.rr_ratio}</span>` : '—'}</td>
-    <td><span class="badge badge-neutral" style="font-size:10px">${t.strategy || '—'}</span></td>
+    <td>${t.rr_ratio ? `<span class="badge badge-blue">${escapeHtml(t.rr_ratio)}</span>` : '—'}</td>
+    <td><span class="badge badge-neutral" style="font-size:10px">${escapeHtml(t.strategy || '—')}</span></td>
     <td style="font-size:11px;color:var(--text3)">${formatDate(t.open_time)}</td>
     <td onclick="event.stopPropagation()" style="white-space:nowrap">
       <button class="btn btn-outline btn-sm" onclick="openDrawer(${t.id})">View</button>
@@ -1189,8 +1237,8 @@ function openDrawer(id) {
       ['Strategy', t.strategy || '—'], ['Session', t.session || '—'],
       ['Status', t.status], ['Open Time', formatDateTime(t.open_time)],
       ['Close Time', t.close_time ? formatDateTime(t.close_time) : '—'],
-    ].map(([l,v]) => `<div class="dr-row"><span class="dr-label">${l}</span><span class="dr-value">${v}</span></div>`).join('')}
-    ${t.notes ? `<div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.65"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px">NOTES</div>${t.notes}</div>` : ''}
+    ].map(([l,v]) => `<div class="dr-row"><span class="dr-label">${escapeHtml(l)}</span><span class="dr-value">${escapeHtml(v)}</span></div>`).join('')}
+    ${t.notes ? `<div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.65"><div style="font-size:10px;font-weight:700;color:var(--text3);margin-bottom:5px">NOTES</div>${escapeHtml(t.notes)}</div>` : ''}
     <div style="display:flex;gap:8px;margin-top:16px">
       <button class="btn btn-primary" style="flex:1" onclick="openEditTrade(${t.id})">✏️ Edit</button>
       <button class="btn btn-danger" onclick="deleteTrade(${t.id});closeDrawer()">Delete</button>
@@ -1424,8 +1472,8 @@ function renderAccounts(accounts) {
         <div style="width:44px;height:44px;border-radius:10px;background:rgba(59,130,246,.1);display:flex;align-items:center;justify-content:center;font-size:20px">${typeIcons[a.platform] || '🏦'}</div>
         <span class="badge ${typeBadge[a.account_type] || 'badge-blue'}">● ${a.account_type}</span>
       </div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:3px">${a.platform} — ${a.name}</div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:14px">${a.broker} · ${a.account_number || ''}</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:3px">${escapeHtml(a.platform)} — ${escapeHtml(a.name)}</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:14px">${escapeHtml(a.broker)} · ${escapeHtml(a.account_number || '')}</div>
       <div style="display:flex;flex-direction:column;gap:6px;font-size:12px">
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Balance</span><span style="font-weight:700">$${parseFloat(a.balance||0).toLocaleString()}</span></div>
         <div style="display:flex;justify-content:space-between"><span style="color:var(--text3)">Equity</span><span style="font-weight:700;color:var(--green2)">$${parseFloat(a.equity||0).toLocaleString()}</span></div>
@@ -1513,13 +1561,26 @@ function renderAIInsights(insights) {
     warning:     { color:'var(--red2)',   bg:'rgba(239,68,68,.07)',  border:'rgba(239,68,68,.2)',   icon:'⚠️' },
     insight:     { color:'var(--blue2)',  bg:'rgba(59,130,246,.07)', border:'rgba(59,130,246,.2)',  icon:'📊' },
   };
-  el.innerHTML = insights.slice(0, 6).map(ins => {
+  // FIX (XSS defense-in-depth): ins.title/ins.message can come from the
+  // OpenAI response when a real API key is configured. They were being
+  // interpolated both into innerHTML AND directly inside an inline
+  // onclick="..." attribute string — the latter is breakable with a
+  // single quote in the text, which is a worse injection primitive than
+  // innerHTML alone. Store insights on the element via a data index and
+  // look them up on click instead of string-building the handler.
+  window.__lastInsights = insights;
+  el.innerHTML = insights.slice(0, 6).map((ins, i) => {
     const s = styles[ins.type] || styles.insight;
-    return `<div style="padding:12px 14px;background:${s.bg};border:1px solid ${s.border};border-radius:9px;margin-bottom:9px;cursor:pointer" onclick="showToast('${ins.title}','info')">
-      <div style="font-size:10px;font-weight:700;color:${s.color};margin-bottom:5px;letter-spacing:.04em">${s.icon} ${ins.title} <span style="opacity:.6;font-size:9px;margin-left:6px">${ins.impact?.toUpperCase()}</span></div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.6">${ins.message}</div>
+    return `<div style="padding:12px 14px;background:${s.bg};border:1px solid ${s.border};border-radius:9px;margin-bottom:9px;cursor:pointer" onclick="showInsightToast(${i})">
+      <div style="font-size:10px;font-weight:700;color:${s.color};margin-bottom:5px;letter-spacing:.04em">${s.icon} ${escapeHtml(ins.title)} <span style="opacity:.6;font-size:9px;margin-left:6px">${escapeHtml((ins.impact||'').toUpperCase())}</span></div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6">${escapeHtml(ins.message)}</div>
     </div>`;
   }).join('');
+}
+
+function showInsightToast(i) {
+  const ins = (window.__lastInsights || [])[i];
+  if (ins) showToast(ins.title, 'info');
 }
 
 function renderHoursGrid() {
@@ -1572,12 +1633,13 @@ function renderLeaderboard(entries, myId) {
   const grads  = ['linear-gradient(135deg,#2563eb,#7c3aed)','linear-gradient(135deg,#10b981,#2563eb)','linear-gradient(135deg,#f59e0b,#ef4444)','linear-gradient(135deg,#8b5cf6,#ec4899)','linear-gradient(135deg,#10b981,#f59e0b)'];
   el.innerHTML = entries.map((e, i) => {
     const isMe = e.user_id === myId;
-    const initials = (e.name||'TT').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const safeName = escapeHtml(e.name || 'Trader');
+    const initials = escapeHtml((e.name||'TT').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2));
     return `<div class="rank-card ${isMe ? 'me' : ''}">
       <div style="font-size:18px;width:32px;text-align:center">${medals[i+1] || `<span style="font-size:13px;color:var(--text3)">#${i+1}</span>`}</div>
       <div style="width:36px;height:36px;border-radius:50%;background:${grads[i%grads.length]};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:600">${e.name || 'Trader'}${isMe ? ' <span style="font-size:10px;color:var(--blue2)">(You)</span>' : ''}</div>
+        <div style="font-size:13px;font-weight:600">${safeName}${isMe ? ' <span style="font-size:10px;color:var(--blue2)">(You)</span>' : ''}</div>
         <div style="font-size:10px;color:var(--text3)">${e.total_trades || 0} trades · WR ${parseFloat(e.win_rate||0).toFixed(1)}%</div>
       </div>
       <div style="text-align:right;flex-shrink:0">

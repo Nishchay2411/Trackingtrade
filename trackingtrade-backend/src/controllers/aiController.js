@@ -1,5 +1,6 @@
 const db     = require('../config/database');
 const OpenAI = require('openai');
+const logger = require('../utils/logger');
 
 // GET /api/ai/insights
 const getInsights = async (req, res) => {
@@ -8,10 +9,10 @@ const getInsights = async (req, res) => {
       'SELECT * FROM ai_insights WHERE user_id = ? ORDER BY created_at DESC LIMIT 10',
       [req.user.id]
     );
-    res.json({ success: true, insights });
+    res.success({ insights });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    logger.error(err);
+    res.fail('Server error', 500);
   }
 };
 
@@ -26,10 +27,7 @@ const generateInsights = async (req, res) => {
     `, [req.user.id]);
 
     if (trades.length < 3) {
-      return res.status(400).json({
-        success: false,
-        message: 'You need at least 3 closed trades to generate AI insights.'
-      });
+      return res.fail('You need at least 3 closed trades to generate AI insights.', 400);
     }
 
     const wins     = trades.filter(t => t.pnl > 0).length;
@@ -59,7 +57,7 @@ const generateInsights = async (req, res) => {
         );
       }
 
-      return res.json({ success: true, message: 'Insights generated!', insights: mockInsights });
+      return res.success({ insights: mockInsights }, 'Insights generated!');
     }
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -86,8 +84,8 @@ Return ONLY a JSON array with 4 objects, each having: type (strength/improvement
     try {
       insights = JSON.parse(completion.choices[0].message.content);
     } catch (parseErr) {
-      console.error('AI parse error:', parseErr);
-      return res.status(500).json({ success: false, message: 'Could not parse AI response' });
+      logger.error('AI parse error:', parseErr);
+      return res.fail('Could not parse AI response', 500);
     }
 
     for (const insight of insights) {
@@ -97,11 +95,11 @@ Return ONLY a JSON array with 4 objects, each having: type (strength/improvement
       );
     }
 
-    res.json({ success: true, message: 'AI insights generated!', insights });
+    res.success({ insights }, 'AI insights generated!');
 
   } catch (err) {
-    console.error('AI error:', err);
-    res.status(500).json({ success: false, message: 'AI generation failed. Please try again.' });
+    logger.error('AI error:', err);
+    res.fail('AI generation failed. Please try again.', 500);
   }
 };
 
@@ -114,7 +112,7 @@ const getScores = async (req, res) => {
     );
 
     if (!trades.length) {
-      return res.json({ success: true, scores: { overall: 0, discipline: 0, riskManagement: 0, consistency: 0 } });
+      return res.success({ scores: { overall: 0, discipline: 0, riskManagement: 0, consistency: 0 } });
     }
 
     const wins        = trades.filter(t => t.pnl > 0).length;
@@ -130,8 +128,7 @@ const getScores = async (req, res) => {
     const riskManagement = Math.round(hasSlPct);
     const overall        = Math.round((winRate * 0.4) + (discipline * 0.3) + (consistency * 0.3));
 
-    res.json({
-      success: true,
+    res.success({
       scores: {
         overall:        Math.min(100, overall),
         discipline:     Math.min(100, discipline),
@@ -140,8 +137,8 @@ const getScores = async (req, res) => {
       }
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    logger.error(err);
+    res.fail('Server error', 500);
   }
 };
 
@@ -152,10 +149,10 @@ const markRead = async (req, res) => {
       'UPDATE ai_insights SET is_read=TRUE WHERE id=? AND user_id=?',
       [req.params.id, req.user.id]
     );
-    res.json({ success: true, message: 'Marked as read' });
+    res.success({}, 'Marked as read');
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    logger.error(err);
+    res.fail('Server error', 500);
   }
 };
 

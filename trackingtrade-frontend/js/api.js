@@ -23,6 +23,10 @@ const API = {
     me:             ()  => API.request('/auth/me'),
     update:         (d) => API.request('/auth/update',          'PUT',  d),
     changePassword: (d) => API.request('/auth/change-password', 'PUT',  d),
+    // FIX: these were missing, so the "Forgot Password" flow had no way
+    // to actually reach the backend endpoints.
+    forgotPassword: (d) => API.request('/auth/forgot-password',  'POST', d),
+    resetPassword:  (d) => API.request('/auth/reset-password',   'POST', d),
   },
 
   // ── TRADES ──

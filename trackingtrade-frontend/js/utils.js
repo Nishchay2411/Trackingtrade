@@ -2,6 +2,22 @@
 // TrackingTrade — Utility Functions
 // ============================================
 
+// ── SECURITY: HTML ESCAPING ──
+// FIX (Critical XSS): any user-supplied text (names, trade notes, pairs,
+// account names, etc.) MUST be passed through this before being placed
+// inside innerHTML. Without this, a malicious display name or trade note
+// executes as JavaScript in every browser that renders it (e.g. the
+// leaderboard renders every user's `name` field to every visitor).
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ── THEME ──
 function initTheme() {
   const saved = localStorage.getItem('tt_theme') || 'dark';
@@ -35,7 +51,7 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = 'tt-toast';
   toast.style.cssText = `border-left:3px solid ${colors[type]};`;
-  toast.innerHTML = `<span>${icons[type]}</span><span>${message}</span>`;
+  toast.innerHTML = `<span>${icons[type]}</span><span>${escapeHtml(message)}</span>`;
   container.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)';

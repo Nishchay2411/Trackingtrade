@@ -8,7 +8,8 @@ const {
   changePassword,
   forgotPassword,
   resetPassword,
-  verifyEmail
+  verifyEmail,
+  resendVerification
 } = require('../controllers/authController');
 
 const { protect } = require('../middleware/auth');
@@ -16,7 +17,8 @@ const { protect } = require('../middleware/auth');
 const {
   loginLimiter,
   registerLimiter,
-  forgotPasswordLimiter
+  forgotPasswordLimiter,
+  resendVerificationLimiter
 } = require('../middleware/rateLimiter');
 
 // ============================================
@@ -28,6 +30,13 @@ router.post(
   '/register',
   registerLimiter,
   register
+);
+
+// Resend verification email (Critical #5 — was missing)
+router.post(
+  '/resend-verification',
+  resendVerificationLimiter,
+  resendVerification
 );
 
 // Login

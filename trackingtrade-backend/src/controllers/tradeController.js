@@ -1,4 +1,6 @@
 const db = require('../config/database');
+const logger = require('../utils/logger');
+const { validateTradeInput } = require('../utils/validators');
 
 // ── Helper: Calculate P&L ──
 const calcPnL = (pair, type, entry, exit, lots) => {
@@ -41,26 +43,6 @@ const calcDuration = (open_time, close_time) => {
   return { duration: `${hrs}h ${mins}m`, error: null };
 };
 
-// FIX Bug 3: Synced to match DB ENUM exactly
-const validTypes = ['BUY', 'SELL'];
-
-const validStrategies = [
-  'Trend Follow',
-  'Breakout',
-  'Reversal',
-  'Scalp',
-  'Swing',
-  'Other'
-];
-
-const validSessions = [
-  'Asian',
-  'London',
-  'New York',
-  'London/NY',
-  'Asian/London'
-];
-
 // GET /api/trades  — with filters
 const getAllTrades = async (req, res) => {
   try {
@@ -79,10 +61,10 @@ const getAllTrades = async (req, res) => {
     query += ' ORDER BY t.open_time DESC';
 
     const [trades] = await db.query(query, params);
-    res.json({ success: true, count: trades.length, trades });
+    res.success({ count: trades.length, trades });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    logger.error('getAllTrades error:', err);
+    res.fail('Server error', 500);
   }
 };
 
@@ -93,11 +75,11 @@ const getTrade = async (req, res) => {
       'SELECT * FROM trades WHERE id = ? AND user_id = ?',
       [req.params.id, req.user.id]
     );
-    if (!trades.length) return res.status(404).json({ success: false, message: 'Trade not found' });
-    res.json({ success: true, trade: trades[0] });
+    if (!trades.length) return res.fail('Trade not found', 404);
+    res.success({ trade: trades[0] });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    logger.error('getTrade error:', err);
+    res.fail('Server error', 500);
   }
 };
 
@@ -105,63 +87,18 @@ const getTrade = async (req, res) => {
 const createTrade = async (req, res) => {
   try {
     const {
-      account_id,
-      pair,
-      type,
-      lots,
-      entry_price,
-      exit_price,
-      stop_loss,
-      take_profit,
-      open_time,
-      close_time,
-      strategy,
-      session,
-      notes
+      account_id, pair, type, lots, entry_price, exit_price,
+      stop_loss, take_profit, open_time, close_time,
+      strategy, session, notes
     } = req.body;
 
-    // Validation
-    if (!pair || !type || !lots || !entry_price || !open_time) {
-      return res.status(400).json({
-        success: false,
-        message: 'Pair, type, lots, entry price and open time are required'
-      });
-    }
+    // FIX (Item 8 — Input Validation): centralized validation, including
+    // a real format check on `pair` which previously accepted any string
+    // at all (also closes off part of the earlier XSS surface at the source).
+    const check = validateTradeInput(req.body);
+    if (!check.valid) return res.fail(check.message, 400);
 
-    if (!validTypes.includes(type)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid trade type'
-      });
-    }
-
-    if (strategy && !validStrategies.includes(strategy)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid strategy'
-      });
-    }
-
-    if (session && !validSessions.includes(session)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid session'
-      });
-    }
-
-    if (Number(lots) <= 0 || Number(lots) > 1000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid lot size'
-      });
-    }
-
-    if (Number(entry_price) <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Entry price must be greater than zero'
-      });
-    }
+    const normalizedPair = String(pair).toUpperCase();
 
     // Account ownership check
     if (account_id) {
@@ -169,330 +106,107 @@ const createTrade = async (req, res) => {
         'SELECT id FROM trading_accounts WHERE id=? AND user_id=?',
         [account_id, req.user.id]
       );
-
       if (!accounts.length) {
-        return res.status(403).json({
-          success: false,
-          message: 'Invalid trading account'
-        });
+        return res.fail('Invalid trading account', 403);
       }
     }
 
-    const sanitizedNotes =
-      notes?.trim().substring(0, 5000) || '';
+    const status   = exit_price ? 'closed' : 'open';
+    const pnl      = exit_price ? calcPnL(normalizedPair, type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(lots)) : 0;
+    const rr_ratio = exit_price && stop_loss ? calcRR(type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(stop_loss)) : null;
 
-    const status = exit_price ? 'closed' : 'open';
-
-    const pnl = exit_price
-      ? calcPnL(
-          pair,
-          type,
-          Number(entry_price),
-          Number(exit_price),
-          Number(lots)
-        )
-      : 0;
-
-    const rr_ratio =
-      exit_price && stop_loss
-        ? calcRR(
-            type,
-            Number(entry_price),
-            Number(exit_price),
-            Number(stop_loss)
-          )
-        : null;
-
-    const { duration, error } =
-      calcDuration(open_time, close_time);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error
-      });
-    }
+    const { duration, error } = calcDuration(open_time, close_time);
+    if (error) return res.fail(error, 400);
 
     const [result] = await db.query(
-      `INSERT INTO trades (
-        user_id,
-        account_id,
-        pair,
-        type,
-        lots,
-        entry_price,
-        exit_price,
-        stop_loss,
-        take_profit,
-        pnl,
-        rr_ratio,
-        duration,
-        open_time,
-        close_time,
-        status,
-        strategy,
-        session,
-        notes
-      )
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+      `INSERT INTO trades (user_id, account_id, pair, type, lots, entry_price, exit_price,
+       stop_loss, take_profit, pnl, rr_ratio, duration, open_time, close_time,
+       status, strategy, session, notes)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
-        req.user.id,
-        account_id || null,
-        pair,
-        type,
-        lots,
-        entry_price,
-        exit_price || null,
-        stop_loss || null,
-        take_profit || null,
-        pnl,
-        rr_ratio,
-        duration,
-        open_time,
-        close_time || null,
-        status,
-        strategy || 'Other',
-        session || 'London',
-        sanitizedNotes
+        req.user.id, account_id || null, normalizedPair, type, lots, entry_price,
+        exit_price || null, stop_loss || null, take_profit || null,
+        pnl, rr_ratio, duration, open_time, close_time || null,
+        status, strategy || 'Other', session || 'London', notes || ''
       ]
     );
 
-    res.status(201).json({
-      success: true,
-      message: 'Trade logged successfully!',
-      tradeId: result.insertId,
-      pnl,
-      rr_ratio,
-      status
-    });
-
+    res.success({ tradeId: result.insertId, pnl, rr_ratio, status }, 'Trade logged successfully!', 201);
   } catch (err) {
-    console.error(err);
-
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    logger.error('createTrade error:', err);
+    res.fail('Server error', 500);
   }
 };
-
 
 // PUT /api/trades/:id
 const updateTrade = async (req, res) => {
   try {
-
     const [existing] = await db.query(
       'SELECT id FROM trades WHERE id=? AND user_id=?',
       [req.params.id, req.user.id]
     );
-
-    if (!existing.length) {
-      return res.status(404).json({
-        success: false,
-        message: 'Trade not found'
-      });
-    }
+    if (!existing.length) return res.fail('Trade not found', 404);
 
     const {
-      account_id,
-      pair,
-      type,
-      lots,
-      entry_price,
-      exit_price,
-      stop_loss,
-      take_profit,
-      open_time,
-      close_time,
-      strategy,
-      session,
-      notes
+      account_id, pair, type, lots, entry_price, exit_price,
+      stop_loss, take_profit, open_time, close_time,
+      strategy, session, notes
     } = req.body;
 
-    if (!pair || !type || !lots || !entry_price || !open_time) {
-      return res.status(400).json({
-        success: false,
-        message: 'Pair, type, lots, entry price and open time are required'
-      });
-    }
+    const check = validateTradeInput(req.body, { partial: true });
+    if (!check.valid) return res.fail(check.message, 400);
 
-    if (!validTypes.includes(type)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid trade type'
-      });
-    }
+    const normalizedPair = pair !== undefined ? String(pair).toUpperCase() : pair;
 
-    if (strategy && !validStrategies.includes(strategy)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid strategy'
-      });
-    }
-
-    if (session && !validSessions.includes(session)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid session'
-      });
-    }
-
-    if (Number(lots) <= 0 || Number(lots) > 1000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid lot size'
-      });
-    }
-
-    if (Number(entry_price) <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Entry price must be greater than zero'
-      });
-    }
-
+    // Account ownership check
     if (account_id) {
       const [accounts] = await db.query(
         'SELECT id FROM trading_accounts WHERE id=? AND user_id=?',
         [account_id, req.user.id]
       );
-
       if (!accounts.length) {
-        return res.status(403).json({
-          success: false,
-          message: 'Invalid trading account'
-        });
+        return res.fail('Invalid trading account', 403);
       }
     }
 
-    const sanitizedNotes =
-      notes?.trim().substring(0, 5000) || '';
+    const pnl      = exit_price ? calcPnL(normalizedPair, type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(lots)) : 0;
+    const rr_ratio = exit_price && stop_loss ? calcRR(type, parseFloat(entry_price), parseFloat(exit_price), parseFloat(stop_loss)) : null;
+    const status   = exit_price ? 'closed' : 'open';
 
-    const pnl = exit_price
-      ? calcPnL(
-          pair,
-          type,
-          Number(entry_price),
-          Number(exit_price),
-          Number(lots)
-        )
-      : 0;
-
-    const rr_ratio =
-      exit_price && stop_loss
-        ? calcRR(
-            type,
-            Number(entry_price),
-            Number(exit_price),
-            Number(stop_loss)
-          )
-        : null;
-
-    const status = exit_price ? 'closed' : 'open';
-
-    const { duration, error } =
-      calcDuration(open_time, close_time);
-
-    if (error) {
-      return res.status(400).json({
-        success: false,
-        message: error
-      });
-    }
+    const { duration, error } = calcDuration(open_time, close_time);
+    if (error) return res.fail(error, 400);
 
     await db.query(
-      `UPDATE trades
-       SET pair=?,
-           type=?,
-           lots=?,
-           entry_price=?,
-           exit_price=?,
-           stop_loss=?,
-           take_profit=?,
-           pnl=?,
-           rr_ratio=?,
-           duration=?,
-           open_time=?,
-           close_time=?,
-           status=?,
-           strategy=?,
-           session=?,
-           notes=?,
-           account_id=?
-       WHERE id=?`,
+      `UPDATE trades SET pair=?, type=?, lots=?, entry_price=?, exit_price=?, stop_loss=?,
+       take_profit=?, pnl=?, rr_ratio=?, duration=?, open_time=?, close_time=?,
+       status=?, strategy=?, session=?, notes=?, account_id=? WHERE id=?`,
       [
-        pair,
-        type,
-        lots,
-        entry_price,
-        exit_price || null,
-        stop_loss || null,
-        take_profit || null,
-        pnl,
-        rr_ratio,
-        duration,
-        open_time,
-        close_time || null,
-        status,
-        strategy || 'Other',
-        session || 'London',
-        sanitizedNotes,
-        account_id || null,
-        req.params.id
+        normalizedPair, type, lots, entry_price, exit_price || null, stop_loss || null,
+        take_profit || null, pnl, rr_ratio, duration, open_time, close_time || null,
+        status, strategy, session, notes, account_id || null, req.params.id
       ]
     );
 
-    res.json({
-      success: true,
-      message: 'Trade updated!',
-      pnl,
-      status
-    });
-
+    res.success({ pnl, status }, 'Trade updated!');
   } catch (err) {
-    console.error(err);
-
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    logger.error('updateTrade error:', err);
+    res.fail('Server error', 500);
   }
 };
-
 
 // DELETE /api/trades/:id
 const deleteTrade = async (req, res) => {
   try {
-
     const [existing] = await db.query(
-      'SELECT id FROM trades WHERE id = ? AND user_id = ?',
+      'SELECT id FROM trades WHERE id=? AND user_id=?',
       [req.params.id, req.user.id]
     );
-
-    if (!existing.length) {
-      return res.status(404).json({
-        success: false,
-        message: 'Trade not found'
-      });
-    }
-
-    await db.query(
-      'DELETE FROM trades WHERE id = ?',
-      [req.params.id]
-    );
-
-    res.json({
-      success: true,
-      message: 'Trade deleted successfully!'
-    });
-
+    if (!existing.length) return res.fail('Trade not found', 404);
+    await db.query('DELETE FROM trades WHERE id=?', [req.params.id]);
+    res.success({}, 'Trade deleted!');
   } catch (err) {
-    console.error('Delete Trade Error:', err);
-
-    res.status(500).json({
-      success: false,
-      message: 'Server error'
-    });
+    logger.error('deleteTrade error:', err);
+    res.fail('Server error', 500);
   }
 };
 

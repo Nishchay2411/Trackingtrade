@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 const protect = (req, res, next) => {
   let token;
@@ -13,10 +14,7 @@ const protect = (req, res, next) => {
 
   // No token provided
   if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: 'Access denied. Please login first.'
-    });
+    return res.fail('Access denied. Please login first.', 401);
   }
 
   try {
@@ -28,22 +26,15 @@ const protect = (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('JWT Error:', error.message);
-
-    return res.status(401).json({
-      success: false,
-      message: 'Invalid or expired token.'
-    });
+    logger.warn('JWT verification failed:', error.message);
+    return res.fail('Invalid or expired token.', 401);
   }
 };
 
 const requirePlan = (...plans) => {
   return (req, res, next) => {
     if (!req.user || !plans.includes(req.user.plan)) {
-      return res.status(403).json({
-        success: false,
-        message: `This feature requires ${plans.join(' or ')} plan.`
-      });
+      return res.fail(`This feature requires ${plans.join(' or ')} plan.`, 403);
     }
 
     next();
