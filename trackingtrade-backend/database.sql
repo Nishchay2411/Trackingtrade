@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
   id                         INT AUTO_INCREMENT PRIMARY KEY,
   name                       VARCHAR(100) NOT NULL,
   email                      VARCHAR(100) NOT NULL UNIQUE,
-  password                   VARCHAR(255) NOT NULL,
+  password                   VARCHAR(255) DEFAULT NULL, -- nullable: Google-only accounts have no password
+  google_id                  VARCHAR(255) DEFAULT NULL,
   timezone                   VARCHAR(50) DEFAULT 'UTC',
   currency                   VARCHAR(10) DEFAULT 'USD',
   plan                       ENUM('starter','pro','elite') DEFAULT 'starter',
@@ -27,7 +28,8 @@ CREATE TABLE IF NOT EXISTS users (
   created_at                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at                 TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_verification_token (verification_token),
-  INDEX idx_reset_token (reset_token)
+  INDEX idx_reset_token (reset_token),
+  UNIQUE INDEX idx_google_id (google_id)
 );
 
 -- ── TRADING ACCOUNTS TABLE ──
@@ -112,6 +114,23 @@ CREATE TABLE IF NOT EXISTS leaderboard (
   UNIQUE KEY unique_user_month (user_id, month),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
   INDEX idx_leaderboard_month_points (month, points)
+);
+
+-- ── REFRESH TOKENS TABLE ──
+-- Opaque, revocable long-lived tokens (see src/utils/tokens.js). Only the
+-- SHA-256 hash is ever stored — never the raw token. Rows are marked
+-- revoked_at (soft-revoke, kept for audit) rather than deleted so a
+-- reused/stolen token can be logged for investigation.
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  user_id     INT NOT NULL,
+  token_hash  VARCHAR(64) NOT NULL,
+  expires_at  DATETIME NOT NULL,
+  revoked_at  DATETIME DEFAULT NULL,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_refresh_user (user_id),
+  INDEX idx_refresh_hash (token_hash)
 );
 
 -- ── SAMPLE DATA ──

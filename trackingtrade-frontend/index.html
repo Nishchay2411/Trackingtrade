@@ -5,6 +5,7 @@
 <title>TrackingTrade — AI Trading Journal</title>
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -160,8 +161,8 @@
       <div style="display:flex;justify-content:flex-end;margin-bottom:18px"><button class="lnk" onclick="showPage('forgot')">Forgot password?</button></div>
       <button class="btn btn-primary btn-full" id="login-btn" onclick="doLogin()">Sign In</button>
       <div class="auth-divider"><span>or</span></div>
+      <div id="google-signin-login" style="display:flex;justify-content:center;margin-bottom:4px"></div>
       <div class="g2" style="gap:8px">
-        <button class="btn btn-outline" style="justify-content:center" onclick="showToast('Google OAuth coming soon','info')">🌐 Google</button>
         <button class="btn btn-outline" style="justify-content:center" onclick="showToast('Apple ID coming soon','info')">🍎 Apple</button>
       </div>
       <div class="auth-footer">No account? <button class="lnk" onclick="showPage('register')">Create one free →</button></div>
@@ -187,6 +188,8 @@
       <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="reg-email" placeholder="john@example.com"></div>
       <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="reg-pass"placeholder="Min 8 chars, 1 Uppercase, 1 Number, 1 Symbol"></div>
       <button class="btn btn-primary btn-full" id="reg-btn" onclick="doRegister()" style="margin-top:4px">Create Account</button>
+      <div class="auth-divider"><span>or</span></div>
+      <div id="google-signin-register" style="display:flex;justify-content:center;margin-bottom:4px"></div>
       <div class="auth-footer">Already have an account? <button class="lnk" onclick="showPage('login')">Sign in</button></div>
       <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--text3)">
         By signing up you agree to our <a href="#" style="color:var(--blue2)">Terms</a> and <a href="#" style="color:var(--blue2)">Privacy Policy</a>
@@ -766,7 +769,55 @@ window.addEventListener('load', () => {
     if (e.key === 'Enter') doLogin();
   });
 
+  initGoogleSignIn();
+
 });
+
+// ══ GOOGLE SIGN-IN ═════════════════════════════
+// FIX (Item — Google Login): the old buttons on the login/register pages
+// just showed a "coming soon" toast. This wires up real Google Identity
+// Services sign-in for both pages, backed by /api/auth/google which
+// verifies the ID token server-side and finds-or-creates the account.
+function initGoogleSignIn(retries = 20) {
+  if (typeof google === 'undefined' || !google.accounts?.id) {
+    // The GSI script loads async — if it hasn't arrived yet, retry
+    // briefly rather than failing silently.
+    if (retries > 0) return setTimeout(() => initGoogleSignIn(retries - 1), 250);
+    console.warn('Google Identity Services failed to load.');
+    return;
+  }
+
+  if (!CONFIG.GOOGLE_CLIENT_ID || CONFIG.GOOGLE_CLIENT_ID.includes('your_google_oauth_client_id')) {
+    // Not configured yet — leave the containers empty rather than
+    // throwing, so the rest of the app still works during setup.
+    return;
+  }
+
+  google.accounts.id.initialize({
+    client_id: CONFIG.GOOGLE_CLIENT_ID,
+    callback: handleGoogleCredentialResponse
+  });
+
+  const loginEl = document.getElementById('google-signin-login');
+  const regEl   = document.getElementById('google-signin-register');
+  if (loginEl) google.accounts.id.renderButton(loginEl, { theme: 'outline', size: 'large', width: 300, text: 'continue_with' });
+  if (regEl)   google.accounts.id.renderButton(regEl,   { theme: 'outline', size: 'large', width: 300, text: 'signup_with' });
+}
+
+async function handleGoogleCredentialResponse(response) {
+  try {
+    const res = await API.auth.google({ credential: response.credential });
+    Auth.login(res.token, res.user);
+    showPage('app');
+    await initApp();
+    setTimeout(() => {
+      loadDashboard();
+      window.dispatchEvent(new Event('resize'));
+    }, 500);
+  } catch (e) {
+    showToast(e.message || 'Google sign-in failed', 'error');
+  }
+}
 
 // ══ AUTH ═══════════════════════════════════════
 // ══ AUTH ═══════════════════════════════════════

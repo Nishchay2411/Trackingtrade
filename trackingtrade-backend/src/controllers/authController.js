@@ -1,49 +1,64 @@
 const bcrypt = require('bcryptjs');
-const jwt    = require('jsonwebtoken');
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
+
 const db     = require('../config/database');
 const logger = require('../utils/logger');
 const { validateRegisterInput, isValidEmail, isValidPassword } = require('../utils/validators');
+const { sendMailAsync } = require('../utils/mailer');
+const { verifyEmailTemplate } = require('../emails/verifyEmail');
+const { resetPasswordTemplate } = require('../emails/resetPassword');
+const {
+  generateAccessToken,
+  generateRefreshTokenValue,
+  hashToken,
+  refreshCookieOptions,
+  REFRESH_TOKEN_TTL_MS
+} = require('../utils/tokens');
 
 const VERIFICATION_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 const RESET_TOKEN_TTL_MS        = 60 * 60 * 1000;       // 1h
 const LOCK_DURATION_MS          = 15 * 60 * 1000;        // 15min
 const MAX_LOGIN_ATTEMPTS        = 5;
 
-const generateToken = (id, email, plan) =>
-  jwt.sign({ id, email, plan }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '7d' });
+const googleClient = process.env.GOOGLE_CLIENT_ID ? new OAuth2Client(process.env.GOOGLE_CLIENT_ID) : null;
 
-// ── Brevo HTTP API (no SMTP, works on Railway) ──
-const sendBrevoMail = async ({ to, subject, html }) => {
-  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: {
-      'accept':       'application/json',
-      'api-key':      process.env.BREVO_API_KEY,
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      sender:      { name: 'TrackingTrade', email: process.env.EMAIL_FROM },
-      to:          [{ email: to }],
-      subject,
-      htmlContent: html
-    })
-  });
+// ── Helper: issue a fresh access+refresh token pair for a user, set the
+// refresh cookie, and return the access token + safe user object. Shared
+// by login, google login, and refresh so the "session issuance" logic
+// only lives in one place. ──
+async function issueSession(res, user) {
+  const accessToken  = generateAccessToken(user);
+  const refreshValue = generateRefreshTokenValue();
+  const refreshHash  = hashToken(refreshValue);
+  const expiresAt    = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Brevo API error: ${errText}`);
-  }
+  await db.query(
+    'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
+    [user.id, refreshHash, expiresAt]
+  );
 
-  return response.json();
-};
+  res.cookie('refreshToken', refreshValue, refreshCookieOptions());
 
-const verifyEmailHtml = (name, verifyLink) => `
-  <h2>Welcome to TrackingTrade 🚀</h2>
-  <p>Hi ${name}, please verify your email by clicking the button below:</p>
-  <a href="${verifyLink}" style="background:#7C5CFC;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">Verify Email</a>
-  <p>This link expires in 24 hours. If you didn't create this account, ignore this email.</p>
-`;
+  return {
+    token: accessToken,
+    user: {
+      id:       user.id,
+      name:     user.name,
+      email:    user.email,
+      plan:     user.plan,
+      timezone: user.timezone,
+      currency: user.currency
+    }
+  };
+}
+
+// Revoke every active refresh token for a user — used on password
+// change/reset so a stolen password can't be paired with a still-valid
+// long-lived session; forces re-login everywhere.
+async function revokeAllRefreshTokens(userId) {
+  await db.query('UPDATE refresh_tokens SET revoked_at=NOW() WHERE user_id=? AND revoked_at IS NULL', [userId]);
+}
 
 // ============================================
 // REGISTER
@@ -60,11 +75,9 @@ const register = async (req, res) => {
       return res.fail('Email already registered', 400);
     }
 
-    const hashed            = await bcrypt.hash(password, 12);
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    // FIX (Critical #1): verification tokens never expired before — a link
-    // leaked or sitting in an old inbox would stay valid forever.
-    const tokenExpiry       = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS);
+    const hashed             = await bcrypt.hash(password, 12);
+    const verificationToken  = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry        = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS);
 
     const [result] = await db.query(
       'INSERT INTO users (name, email, password, verification_token, verification_token_expiry) VALUES (?, ?, ?, ?, ?)',
@@ -72,22 +85,12 @@ const register = async (req, res) => {
     );
 
     const verifyLink = `${process.env.FRONTEND_URL}/verify-email.html?token=${verificationToken}`;
+    const { subject, html } = verifyEmailTemplate({ name, verifyLink });
 
-    // FIX (Item 10 — Email Failure Handling): the user row is already
-    // committed at this point. If Brevo is down or rate-limited, we must
-    // NOT return a 500 (the account exists, "failed" would be a lie, and
-    // the user can't re-register since the email is now taken). Log the
-    // failure, still return 201, and let them use "Resend verification".
-    try {
-      await sendBrevoMail({
-        to:      email,
-        subject: 'Verify your TrackingTrade account',
-        html:    verifyEmailHtml(name, verifyLink)
-      });
-    } catch (mailErr) {
-      logger.error('Register: verification email failed to send', { userId: result.insertId, email, err: mailErr.message });
-      return res.success({}, 'Account created, but we could not send the verification email right now. Use "Resend verification email" on the login page to try again.', 201);
-    }
+    // FIX (Brevo non-blocking): fire-and-forget — the HTTP response below
+    // does not wait on Brevo at all now. If it fails, it's logged
+    // server-side and the user can always use "Resend verification email".
+    sendMailAsync({ to: email, subject, html });
 
     return res.success({}, 'Account created! Please check your email to verify before logging in.', 201);
 
@@ -98,20 +101,18 @@ const register = async (req, res) => {
 };
 
 // ============================================
-// RESEND VERIFICATION EMAIL   (Critical #5 — was missing entirely)
+// RESEND VERIFICATION EMAIL
 // ============================================
 const resendVerification = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email || !isValidEmail(email)) return res.fail('A valid email is required', 400);
 
-    // Same generic-response pattern as forgotPassword — never reveal
-    // whether an email is registered or already verified.
-    const generic = { message: 'If that account exists and is not yet verified, a new verification link has been sent.' };
+    const genericMessage = 'If that account exists and is not yet verified, a new verification link has been sent.';
 
     const [users] = await db.query('SELECT id, name, is_verified FROM users WHERE email=?', [email]);
     if (!users.length || users[0].is_verified) {
-      return res.success({}, generic.message);
+      return res.success({}, genericMessage);
     }
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
@@ -123,20 +124,11 @@ const resendVerification = async (req, res) => {
     );
 
     const verifyLink = `${process.env.FRONTEND_URL}/verify-email.html?token=${verificationToken}`;
+    const { subject, html } = verifyEmailTemplate({ name: users[0].name, verifyLink });
 
-    try {
-      await sendBrevoMail({
-        to:      email,
-        subject: 'Verify your TrackingTrade account',
-        html:    verifyEmailHtml(users[0].name, verifyLink)
-      });
-    } catch (mailErr) {
-      logger.error('Resend verification: email failed to send', { userId: users[0].id, email, err: mailErr.message });
-      // Still return the generic success message — don't leak delivery
-      // state to the client, but the user can retry the resend action.
-    }
+    sendMailAsync({ to: email, subject, html });
 
-    return res.success({}, generic.message);
+    return res.success({}, genericMessage);
   } catch (err) {
     logger.error('Resend Verification Error:', err);
     res.fail('Server error', 500);
@@ -162,6 +154,11 @@ const login = async (req, res) => {
 
     let user = users[0];
 
+    if (!user.password) {
+      // Account was created via Google Sign-In and has no password set.
+      return res.fail('This account uses Google Sign-In. Please continue with Google.', 400);
+    }
+
     if (!user.is_verified) {
       return res.fail('Please verify your email before logging in.', 401);
     }
@@ -171,12 +168,6 @@ const login = async (req, res) => {
       return res.fail(`Account locked. Try again in ${minutesLeft} minute(s).`, 423);
     }
 
-    // FIX (Critical #3 — Login Attempt Lock bug): once a lock expired, the
-    // old code never reset `login_attempts`. The very next wrong password
-    // pushed attempts from 5 straight to 6, re-triggering the >=5 branch
-    // and re-locking the account for another 15 minutes immediately —
-    // the user never actually got their 5 fresh attempts back. Reset the
-    // counter here once we know any previous lock has expired.
     if (user.lock_until && user.lock_until <= Date.now()) {
       await db.query('UPDATE users SET login_attempts=0, lock_until=NULL WHERE id=?', [user.id]);
       user = { ...user, login_attempts: 0, lock_until: null };
@@ -195,25 +186,136 @@ const login = async (req, res) => {
       return res.fail(`Invalid credentials. ${MAX_LOGIN_ATTEMPTS - attempts} attempts remaining.`, 401);
     }
 
-    // FIX (Item 11 — last_login): track last successful login.
     await db.query('UPDATE users SET login_attempts=0, lock_until=NULL, last_login=NOW() WHERE id=?', [user.id]);
 
-    const token = generateToken(user.id, user.email, user.plan);
-
-    res.success({
-      token,
-      user: {
-        id:       user.id,
-        name:     user.name,
-        email:    user.email,
-        plan:     user.plan,
-        timezone: user.timezone,
-        currency: user.currency
-      }
-    }, 'Login successful!');
+    const session = await issueSession(res, user);
+    res.success(session, 'Login successful!');
 
   } catch (err) {
     logger.error('Login Error:', err);
+    res.fail('Server error', 500);
+  }
+};
+
+// ============================================
+// GOOGLE LOGIN
+// ============================================
+const googleLogin = async (req, res) => {
+  try {
+    if (!googleClient) {
+      logger.error('Google login attempted but GOOGLE_CLIENT_ID is not configured');
+      return res.fail('Google Sign-In is not configured on this server.', 500);
+    }
+
+    const { credential } = req.body;
+    if (!credential) return res.fail('Missing Google credential', 400);
+
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID
+      });
+      payload = ticket.getPayload();
+    } catch (verifyErr) {
+      logger.warn('Google ID token verification failed:', verifyErr.message);
+      return res.fail('Invalid Google credential', 401);
+    }
+
+    if (!payload.email_verified) {
+      return res.fail('Google account email is not verified', 401);
+    }
+
+    const { email, name, sub: googleId } = payload;
+
+    const [existing] = await db.query('SELECT * FROM users WHERE email=? OR google_id=?', [email, googleId]);
+
+    let user;
+    if (existing.length) {
+      user = existing[0];
+      // Account was previously created with a password — link the Google
+      // identity to it (same email = same person) and trust Google's
+      // verification of that email going forward.
+      if (!user.google_id) {
+        await db.query('UPDATE users SET google_id=?, is_verified=TRUE WHERE id=?', [googleId, user.id]);
+        user.google_id = googleId;
+        user.is_verified = 1;
+      }
+    } else {
+      const [result] = await db.query(
+        'INSERT INTO users (name, email, google_id, is_verified) VALUES (?, ?, ?, TRUE)',
+        [name || email.split('@')[0], email, googleId]
+      );
+      const [rows] = await db.query('SELECT * FROM users WHERE id=?', [result.insertId]);
+      user = rows[0];
+    }
+
+    await db.query('UPDATE users SET last_login=NOW() WHERE id=?', [user.id]);
+
+    const session = await issueSession(res, user);
+    res.success(session, 'Signed in with Google!');
+
+  } catch (err) {
+    logger.error('Google Login Error:', err);
+    res.fail('Server error', 500);
+  }
+};
+
+// ============================================
+// REFRESH ACCESS TOKEN
+// ============================================
+const refresh = async (req, res) => {
+  try {
+    const refreshValue = req.cookies?.refreshToken;
+    if (!refreshValue) return res.fail('No refresh token provided', 401);
+
+    const tokenHash = hashToken(refreshValue);
+
+    const [rows] = await db.query(
+      `SELECT rt.*, u.id AS user_id, u.email, u.plan, u.name, u.timezone, u.currency
+       FROM refresh_tokens rt
+       JOIN users u ON u.id = rt.user_id
+       WHERE rt.token_hash=? AND rt.revoked_at IS NULL AND rt.expires_at > NOW()`,
+      [tokenHash]
+    );
+
+    if (!rows.length) {
+      res.clearCookie('refreshToken', { path: '/api/auth' });
+      return res.fail('Invalid or expired session. Please login again.', 401);
+    }
+
+    const row = rows[0];
+
+    // Rotation: revoke the token we just used and issue a brand new one.
+    // If a stolen refresh token gets used by an attacker after the real
+    // user already rotated it, this row will already be revoked and the
+    // lookup above simply fails — a clean signal to force re-login.
+    await db.query('UPDATE refresh_tokens SET revoked_at=NOW() WHERE id=?', [row.id]);
+
+    const user = { id: row.user_id, email: row.email, plan: row.plan, name: row.name, timezone: row.timezone, currency: row.currency };
+    const session = await issueSession(res, user);
+
+    res.success({ token: session.token }, 'Session refreshed');
+  } catch (err) {
+    logger.error('Refresh Token Error:', err);
+    res.fail('Server error', 500);
+  }
+};
+
+// ============================================
+// LOGOUT
+// ============================================
+const logout = async (req, res) => {
+  try {
+    const refreshValue = req.cookies?.refreshToken;
+    if (refreshValue) {
+      const tokenHash = hashToken(refreshValue);
+      await db.query('UPDATE refresh_tokens SET revoked_at=NOW() WHERE token_hash=? AND revoked_at IS NULL', [tokenHash]);
+    }
+    res.clearCookie('refreshToken', { path: '/api/auth' });
+    res.success({}, 'Logged out');
+  } catch (err) {
+    logger.error('Logout Error:', err);
     res.fail('Server error', 500);
   }
 };
@@ -264,11 +366,14 @@ const changePassword = async (req, res) => {
     const [users] = await db.query('SELECT password FROM users WHERE id=?', [req.user.id]);
     if (!users.length) return res.fail('User not found', 404);
 
-    const isMatch = await bcrypt.compare(currentPassword, users[0].password);
+    const isMatch = await bcrypt.compare(currentPassword, users[0].password || '');
     if (!isMatch) return res.fail('Current password incorrect', 400);
 
     const hashed = await bcrypt.hash(newPassword, 12);
     await db.query('UPDATE users SET password=? WHERE id=?', [hashed, req.user.id]);
+
+    // Force re-login on every other device/session.
+    await revokeAllRefreshTokens(req.user.id);
 
     res.success({}, 'Password changed successfully!');
   } catch (err) {
@@ -288,8 +393,6 @@ const forgotPassword = async (req, res) => {
       return res.fail('A valid email is required', 400);
     }
 
-    // Always return the same generic response whether or not the email
-    // exists, so this endpoint can't be used to enumerate registered users.
     const genericMessage = 'If an account exists for that email, a reset link has been sent.';
 
     const [users] = await db.query('SELECT id, name FROM users WHERE email=?', [email]);
@@ -301,23 +404,9 @@ const forgotPassword = async (req, res) => {
     await db.query('UPDATE users SET reset_token=?, reset_token_expiry=? WHERE email=?', [token, expiry, email]);
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password.html?token=${token}`;
+    const { subject, html } = resetPasswordTemplate({ name: users[0].name, resetLink });
 
-    try {
-      await sendBrevoMail({
-        to:      email,
-        subject: 'TrackingTrade Password Reset',
-        html: `
-          <h2>Password Reset Request</h2>
-          <p>Hi ${users[0].name}, click below to reset your password:</p>
-          <a href="${resetLink}" style="background:#7C5CFC;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin:16px 0;">Reset Password</a>
-          <p>This link expires in 1 hour. If you didn't request this, ignore this email.</p>
-        `
-      });
-    } catch (mailErr) {
-      // Item 10: don't blow up the request or leak delivery failure —
-      // just log it. The user can retry "forgot password" again.
-      logger.error('Forgot Password: email failed to send', { userId: users[0].id, email, err: mailErr.message });
-    }
+    sendMailAsync({ to: email, subject, html });
 
     res.success({}, genericMessage);
   } catch (err) {
@@ -357,6 +446,8 @@ const resetPassword = async (req, res) => {
       [hashedPassword, users[0].id]
     );
 
+    await revokeAllRefreshTokens(users[0].id);
+
     res.success({}, 'Password reset successful! Please login.');
   } catch (err) {
     logger.error('Reset Password Error:', err);
@@ -386,8 +477,6 @@ const verifyEmail = async (req, res) => {
       return res.success({}, 'Email already verified. You can log in.');
     }
 
-    // FIX (Critical #1): reject expired tokens instead of accepting them
-    // forever, and point the user at the recovery path.
     if (user.verification_token_expiry && new Date(user.verification_token_expiry) < new Date()) {
       return res.fail('Verification link expired. Please request a new one from the login page.', 400);
     }
@@ -401,4 +490,17 @@ const verifyEmail = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, updateProfile, changePassword, forgotPassword, resetPassword, verifyEmail, resendVerification };
+module.exports = {
+  register,
+  login,
+  googleLogin,
+  refresh,
+  logout,
+  getMe,
+  updateProfile,
+  changePassword,
+  forgotPassword,
+  resetPassword,
+  verifyEmail,
+  resendVerification
+};

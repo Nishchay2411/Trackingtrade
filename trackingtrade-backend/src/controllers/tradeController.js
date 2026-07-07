@@ -1,47 +1,7 @@
 const db = require('../config/database');
 const logger = require('../utils/logger');
 const { validateTradeInput } = require('../utils/validators');
-
-// ── Helper: Calculate P&L ──
-const calcPnL = (pair, type, entry, exit, lots) => {
-  const diff = type === 'BUY'
-    ? exit - entry
-    : entry - exit;
-
-  let contractSize = 100; // Default: Gold (XAUUSD)
-
-  // Crypto
-  if (pair === 'BTCUSD' || pair === 'ETHUSD') {
-    contractSize = 1;
-  }
-  // Forex (anything that isn't Gold or Crypto)
-  else if (pair !== 'XAUUSD') {
-    contractSize = 100000;
-  }
-
-  return Number((diff * lots * contractSize).toFixed(2));
-};
-
-// ── Helper: Calculate RR ──
-const calcRR = (type, entry, exit, sl) => {
-  if (!sl) return null;
-  const reward = type === 'BUY' ? exit - entry : entry - exit;
-  const risk   = type === 'BUY' ? entry - sl   : sl - entry;
-  if (risk <= 0) return null;
-  return `1:${(reward / risk).toFixed(1)}`;
-};
-
-// ── Helper: Calculate Duration ──
-const calcDuration = (open_time, close_time) => {
-  if (!open_time || !close_time) return { duration: null, error: null };
-  const ms = new Date(close_time) - new Date(open_time);
-  if (ms < 0) {
-    return { duration: null, error: 'close_time cannot be before open_time' };
-  }
-  const hrs  = Math.floor(ms / 3600000);
-  const mins = Math.floor((ms % 3600000) / 60000);
-  return { duration: `${hrs}h ${mins}m`, error: null };
-};
+const { calcPnL, calcRR, calcDuration } = require('../utils/tradeCalculations');
 
 // GET /api/trades  — with filters
 const getAllTrades = async (req, res) => {

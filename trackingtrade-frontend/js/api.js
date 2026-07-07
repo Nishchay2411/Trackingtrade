@@ -2,31 +2,80 @@
 // TrackingTrade — API Helper
 // ============================================
 const API = {
-  async request(endpoint, method = 'GET', body = null) {
+  async request(endpoint, method = 'GET', body = null, _isRetry = false) {
     const token   = Auth.getToken();
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    const options = { method, headers };
+
+    const options = {
+      method,
+      headers,
+      // FIX (Refresh Tokens): the refresh token lives in an httpOnly
+      // cookie, which the browser only sends/accepts cross-site if the
+      // request opts in with credentials:'include' (and the backend CORS
+      // config allows it — already set to credentials:true there).
+      credentials: 'include'
+    };
     if (body) options.body = JSON.stringify(body);
+
+    const res  = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, options);
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      // FIX: access tokens are now short-lived (15m) instead of 7 days,
+      // so they expire mid-session far more often. Rather than kicking
+      // the user out every 15 minutes, try one silent refresh (using the
+      // httpOnly cookie) and transparently retry the original request.
+      // Skip this for the auth endpoints that would otherwise create a
+      // retry loop or make no sense to retry (login/register/google
+      // failures are real credential errors, not expiry).
+      const skipRetryFor = ['/auth/refresh', '/auth/login', '/auth/register', '/auth/google', '/auth/logout'];
+      const shouldTryRefresh = res.status === 401 && token && !_isRetry && !skipRetryFor.includes(endpoint);
+
+      if (shouldTryRefresh) {
+        const refreshed = await API._silentRefresh();
+        if (refreshed) {
+          return API.request(endpoint, method, body, true);
+        }
+        // Refresh also failed — the session is truly over.
+        Auth.logout();
+        return Promise.reject(new Error('Session expired. Please login again.'));
+      }
+
+      throw new Error(data.message || 'Something went wrong');
+    }
+
+    return data;
+  },
+
+  // Calls /auth/refresh directly (bypassing API.request to avoid
+  // recursion) and, on success, stores the new access token.
+  async _silentRefresh() {
     try {
-      const res  = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, options);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Something went wrong');
-      return data;
-    } catch (err) { throw err; }
+      const res  = await fetch(`${CONFIG.API_BASE_URL}/auth/refresh`, { method: 'POST', credentials: 'include' });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.token) {
+        Auth.setToken(data.token);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
   },
 
   // ── AUTH ──
   auth: {
-    register:       (d) => API.request('/auth/register',        'POST', d),
-    login:          (d) => API.request('/auth/login',           'POST', d),
-    me:             ()  => API.request('/auth/me'),
-    update:         (d) => API.request('/auth/update',          'PUT',  d),
-    changePassword: (d) => API.request('/auth/change-password', 'PUT',  d),
-    // FIX: these were missing, so the "Forgot Password" flow had no way
-    // to actually reach the backend endpoints.
-    forgotPassword: (d) => API.request('/auth/forgot-password',  'POST', d),
-    resetPassword:  (d) => API.request('/auth/reset-password',   'POST', d),
+    register:           (d) => API.request('/auth/register',            'POST', d),
+    login:              (d) => API.request('/auth/login',               'POST', d),
+    google:             (d) => API.request('/auth/google',              'POST', d),
+    logout:             ()  => API.request('/auth/logout',              'POST'),
+    me:                 ()  => API.request('/auth/me'),
+    update:             (d) => API.request('/auth/update',              'PUT',  d),
+    changePassword:     (d) => API.request('/auth/change-password',     'PUT',  d),
+    forgotPassword:     (d) => API.request('/auth/forgot-password',     'POST', d),
+    resetPassword:      (d) => API.request('/auth/reset-password',      'POST', d),
+    resendVerification: (d) => API.request('/auth/resend-verification', 'POST', d),
   },
 
   // ── TRADES ──

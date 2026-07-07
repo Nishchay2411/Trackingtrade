@@ -3,6 +3,9 @@ const router = require('express').Router();
 const {
   register,
   login,
+  googleLogin,
+  refresh,
+  logout,
   getMe,
   updateProfile,
   changePassword,
@@ -25,70 +28,22 @@ const {
 // PUBLIC ROUTES
 // ============================================
 
-// Register
-router.post(
-  '/register',
-  registerLimiter,
-  register
-);
-
-// Resend verification email (Critical #5 — was missing)
-router.post(
-  '/resend-verification',
-  resendVerificationLimiter,
-  resendVerification
-);
-
-// Login
-router.post(
-  '/login',
-  loginLimiter,
-  login
-);
-
-// Forgot Password
-router.post(
-  '/forgot-password',
-  forgotPasswordLimiter,
-  forgotPassword
-);
-
-// Reset Password
-router.post(
-  '/reset-password',
-  forgotPasswordLimiter,
-  resetPassword
-);
-
-// Verify Email
-router.get(
-  '/verify-email/:token',
-  verifyEmail
-);
+router.post('/register', registerLimiter, register);
+router.post('/resend-verification', resendVerificationLimiter, resendVerification);
+router.post('/login', loginLimiter, login);
+router.post('/google', loginLimiter, googleLogin);
+router.post('/refresh', refresh);
+router.post('/logout', logout);
+router.post('/forgot-password', forgotPasswordLimiter, forgotPassword);
+router.post('/reset-password', forgotPasswordLimiter, resetPassword);
+router.get('/verify-email/:token', verifyEmail);
 
 // ============================================
 // PROTECTED ROUTES
 // ============================================
 
-// Get logged in user
-router.get(
-  '/me',
-  protect,
-  getMe
-);
-
-// Update Profile
-router.put(
-  '/update',
-  protect,
-  updateProfile
-);
-
-// Change Password
-router.put(
-  '/change-password',
-  protect,
-  changePassword
-);
+router.get('/me', protect, getMe);
+router.put('/update', protect, updateProfile);
+router.put('/change-password', protect, changePassword);
 
 module.exports = router;
